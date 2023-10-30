@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<header>
+    <title>Flight Display</title>
+</header>
+
+<body>
+    <h1>Upcoming Flights</h1>
+    <table>
+        <th>Airline</th>
+        <th>Flight No.</th>
+        <th>From</th>
+        <th>To</th>
+        {% for flight in data %}
+        <tr>
+            <td>{{flight.airline_name}}</td>
+            <td>{{flight.flight_num}}</td>
+            <td>{{flight.dep_airport}}</td>
+            <td>{{flight.arr_airport}}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    
+    <style>
+        th, td {
+            padding: 15px;
+        }
+    
+    </style>
+</body>
