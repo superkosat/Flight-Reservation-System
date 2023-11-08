@@ -17,12 +17,17 @@ conn = pymysql.connect(host='localhost',
 def index():
     if 'username' in session:
         username = session['username']
-        return redirect(url_for('index'))
+        return redirect(url_for('display_upcoming'))
     return render_template('login.html')
 
 @app.route('/login')
 def login():
     return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+    session.clear
+    return redirect(url_for('login'))
 
 #route for login authentication
 @app.route('/loginAuth', methods=['GET', 'POST'])
@@ -40,7 +45,7 @@ def loginAuth():
     error = None
     if (data):
         session['username'] = username
-        return redirect(url_for('index'))
+        return redirect(url_for('display_upcoming'))
     else:
         error = 'Invalid username or password'
         return render_template('login.html', error=error)
@@ -65,7 +70,14 @@ def display_upcoming():
     else:
         error = 'No upcoming flights found'
         return render_template('index.html', error=error)
+    
+@app.route('/base')
+def base():
+    return render_template('base.html')
 
+@app.route('/test')
+def test():
+    return render_template('test.html')
 
 app.secret_key = 'H2O intolerant'
 

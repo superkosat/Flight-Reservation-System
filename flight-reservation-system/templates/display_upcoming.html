@@ -1,9 +1,11 @@
+{% extends "base.html" %}
 <!DOCTYPE html>
 <header>
     <title>Flight Display</title>
 </header>
 
 <body>
+    {% block content %}
     <h1>Upcoming Flights</h1>
     <table>
         <th>Airline</th>
@@ -19,6 +21,7 @@
         </tr>
         {% endfor %}
     </table>
+    {% endblock %}
     
     <style>
         th, td {
