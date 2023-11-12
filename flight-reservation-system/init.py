@@ -11,14 +11,18 @@ conn = pymysql.connect(host='localhost',
                        charset='utf8mb4',
                        cursorclass=pymysql.cursors.DictCursor)
 
-#Define routes
+### Define routes ###
 
 @app.route('/')
 def index():
     if 'username' in session:
         username = session['username']
-        return redirect(url_for('display_upcoming'))
+        return redirect(url_for('home'))
     return render_template('login.html')
+
+@app.route('/home')
+def home():
+    return render_template('home.html')
 
 @app.route('/login')
 def login():
@@ -70,7 +74,13 @@ def display_upcoming():
     else:
         error = 'No upcoming flights found'
         return render_template('index.html', error=error)
-    
+
+### error handling ###
+@app.errorhandler(404)  
+def not_found(e):
+    return render_template('404.html')
+
+#temporary routes for development REMOVE 
 @app.route('/base')
 def base():
     return render_template('base.html')
@@ -79,8 +89,8 @@ def base():
 def test():
     return render_template('test.html')
 
+#initialization
 app.secret_key = 'H2O intolerant'
-
 
 if __name__ == '__main__':
     app.run('127.0.0.1', 5000, debug=True)
