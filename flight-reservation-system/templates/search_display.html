@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container shadow" style="margin-top: 0px;">
+    <h1>Test area</h1>
+    <hr class="my-2">
+    {% for flight in data %}
+        <div class="container rounded border border-2 border-light" style="padding:10px; padding-top: 10px;">
+            <div class="d-flex align-items-center" style="padding: 5px">
+                {% if flight.airline_name == "American" %}
+                    <img src="../static/img/airline-profiles/AA.png" class="me-3" alt="airline icon" style="width: 35px; height: 35px;">
+                {% elif flight.airline_name == "Air Canada" %}
+                    <img src="../static/img/airline-profiles/AC.png" class="me-3" alt="airline icon" style="width: 35px; height: 35px;">
+                {% elif flight.airline_name == "Alaskan" %}
+                    <img src="../static/img/airline-profiles/AS.png" class="me-3" alt="airline icon" style="width: 35px; height: 35px;">
+                {% elif flight.airline_name == "Air China" %}
+                    <img src="../static/img/airline-profiles/CA.png" class="me-3" alt="airline icon" style="width: 35px; height: 35px;">
+                {% elif flight.airline_name == "Cathay Pacific" %}
+                    <img src="../static/img/airline-profiles/CX.png" class="me-3" alt="airline icon" style="width: 35px; height: 35px;">
+                {% elif flight.airline_name == "China Eastern" %}
+                    <img src="../static/img/airline-profiles/MU.png" class="me-3" alt="airline icon" style="width: 35px; height: 35px;">
+                {% elif flight.airline_name == "Emirates" %}
+                    <img src="../static/img/airline-profiles/EK.png" class="me-3" alt="airline icon" style="width: 35px; height: 35px;">
+                {% elif flight.airline_name == "Lufthansa" %}
+                    <img src="../static/img/airline-profiles/LH.png" class="me-3" alt="airline icon" style="width: 35px; height: 35px;">
+                {% elif flight.airline_name == "Singapore Airlines" %}
+                    <img src="../static/img/airline-profiles/SQ.png" class="me-3" alt="airline icon" style="width: 35px; height: 35px;">
+                {% elif flight.airline_name == "United" %}
+                    <img src="../static/img/airline-profiles/UA.png" class="me-3" alt="airline icon" style="width: 35px; height: 35px;">
+                {% endif %}
+                
+                <div>
+                    <h5>{{flight.dep_airport}} → {{flight.arr_airport}}</h5>
+                        {% if flight.status == "delayed" %}
+                            <span class="badge bg-warning">Delayed</span>
+                        {% elif flight.status == "upcoming" %}
+                            <span class="badge bg-success">On Time</span>
+                        {% elif flight.status == "in progress" %}
+                            <span class="badge bg-info">In-Flight</span>
+                        {% else %}
+                            <span class="badge bg-secondary">Unknown</span>
+                        {% endif %}
+                    
+                    <p class="text-muted">{{flight.airline_name}}</p>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+
+
+    {% if error %}
+        <p class="text-danger">{{error}}</p>
+    {% else %}
+        <p class="text-muted">Search returned N results</p>
+    {% endif %}
+</div>
+{% endblock %}

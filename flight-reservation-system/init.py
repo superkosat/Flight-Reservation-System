@@ -38,19 +38,57 @@ def search():
 
 @app.route('/searchFlights', methods=['GET', 'POST'])
 def searchFlights():
+    departureCity = request.form['departureCity']
+    arrivalCity = request.form['arrivalCity']
+    departureAirport = request.form['departureAirport']
+    arrivalAirport = request.form['arrivalAirport']
+    #year = request.form['year']
+    #month = request.form['month']
+    #day = request.form['day']
+
+    conditions = []
+    params = []
+
+    if departureCity:
+        conditions.append("a.city = %s")
+        params.append(departureCity)
+    if arrivalCity:
+        conditions.append("b.city = %s")
+        params.append(arrivalCity)
+    if departureAirport:
+        conditions.append("flight.dep_airport = %s")
+        params.append(departureAirport)
+    if arrivalAirport:
+        conditions.append("flight.arr_airport = %s")
+        params.append(arrivalAirport)
+
+    error = None
+
+    if not any([departureCity, arrivalCity, departureAirport, arrivalAirport]):
+        error = "Please fill at least one field"
+        return render_template('home.html', error=error)
+
     cursor = conn.cursor()
-    query = 'SELECT airline_name, flight_num, dep_airport, arr_airport FROM flight WHERE status = "upcoming"'
-    cursor.execute(query)
+
+    query = '''
+        SELECT flight.*, a.city AS departure_city, b.city AS arrival_city
+        FROM flight 
+        INNER JOIN airport AS a ON flight.dep_airport = a.name 
+        INNER JOIN airport AS b ON flight.arr_airport = b.name 
+        WHERE {}
+    '''.format(" AND ".join(conditions))
+
+    cursor.execute(query, params)
 
     data = cursor.fetchall()
 
     cursor.close()
-    error = None
-    if (data):
-        return render_template('display_upcoming.html', data=data)
+
+    if data:
+        return render_template('search_display.html', data=data)
     else:
-        error = 'No upcoming flights found'
-        return render_template('index.html', error=error)
+        error = 'No flights found'
+        return render_template('search_display.html', error=error)
 
 @app.route('/login')
 def login():
@@ -98,7 +136,7 @@ def register():
 @app.route('/displayUpcoming')
 def displayUpcoming():
     cursor = conn.cursor()
-    query = 'SELECT airline_name, flight_num, dep_airport, arr_airport FROM flight WHERE status = "upcoming"'
+    query = 'SELECT airline_name, flight_num, dep_airport, arr_airport, status FROM flight WHERE status IN ("upcoming", "delayed")'
     cursor.execute(query)
 
     data = cursor.fetchall()
@@ -113,9 +151,9 @@ def displayUpcoming():
 
 #define route to display purchased flights
 #MUST BE LOGGED IN WITH CUSTOMER PERMISSION
-@app.route('/my_flights')
+@app.route('/myFlights')
 def my_flights():
-    return render_template('customer_flights.html')
+    return render_template('view_my_flights.html')
 
 
 

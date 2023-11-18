@@ -16,9 +16,9 @@
 
 
 
-    <nav class="shadow-sm navbar navbar-expand-lg navbar-light">
+    <nav class="shadow-sm navbar sticky-top navbar-expand-lg navbar-light bg-light">
         <div class="container-fluid">
-          <a class="navbar-brand" href="#">Flight Reservation System</a>
+          <a class="navbar-brand border border-2 rounded border-primary" style="padding:5px;" href="/home">Flight Reservation System</a>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
           </button>
@@ -38,15 +38,21 @@
                   Flights
                 </a>
                 <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                  <li><a class="dropdown-item" href="/my_flights">My Flights</a></li>
+                  <li><a class="dropdown-item" href="/myFlights">My Flights</a></li>
                   <li><a class="dropdown-item" href="/displayUpcoming">Upcoming</a></li>
                 </ul>
               </li>
             </ul>
             <ul class="navbar-nav ms-auto">
-                {% if session['username'] %}<a class="btn btn-outline-primary" href="/logout" role="button" style="margin-right: 10px">
+                {% if session['username'] %}
+                <a class="btn btn-outline-primary" href="/logout" role="button" style="margin-right: 10px">
                     Account
-                </a>{% endif %}
+                </a>
+                {% else %}
+                <a class="btn btn-outline-primary" href="/logout" role="button" style="margin-right: 10px">
+                    Register
+                </a>
+                {% endif %}
                 <a class="btn btn-primary" href="/logout" role="button">
                     {% if session['username'] %}
                     Log out

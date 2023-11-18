@@ -18,6 +18,11 @@
             <td>{{flight.flight_num}}</td>
             <td>{{flight.dep_airport}}</td>
             <td>{{flight.arr_airport}}</td>
+            {% if flight.status == "delayed" %}
+                <td><span class="badge bg-warning">delayed</span></td>
+            {% elif flight.status == "upcoming" %}
+                <td><span class="badge bg-success">on time</span></td>
+            {% endif %}
         </tr>
         {% endfor %}
     </table>
