@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container shadow" style="margin-top: 0px;">
+<div class="container shadow col-md-8" style="margin-top: 0px;">
     <h1>Test area</h1>
     <hr class="my-2">
     {% for flight in data %}
@@ -27,15 +27,35 @@
                     <img src="../static/img/airline-profiles/SQ.png" class="me-3" alt="airline icon" style="width: 35px; height: 35px;">
                 {% elif flight.airline_name == "United" %}
                     <img src="../static/img/airline-profiles/UA.png" class="me-3" alt="airline icon" style="width: 35px; height: 35px;">
+                {% elif flight.airline_name == "Delta Air Lines" %}
+                    <img src="../static/img/airline-profiles/DL.png" class="me-3" alt="airline icon" style="width: 35px; height: 35px;">
+                {% elif flight.airline_name == "Spring" %}
+                    <img src="../static/img/airline-profiles/9C.png" class="me-3" alt="airline icon" style="width: 35px; height: 35px;">
+                {% elif flight.airline_name == "JAL" %}
+                    <img src="../static/img/airline-profiles/JL.png" class="me-3" alt="airline icon" style="width: 35px; height: 35px;">
+                {% elif flight.airline_name == "Korean Air" %}
+                    <img src="../static/img/airline-profiles/KE.png" class="me-3" alt="airline icon" style="width: 35px; height: 35px;">
+                {% elif flight.airline_name == "Air France" %}
+                    <img src="../static/img/airline-profiles/AF.png" class="me-3" alt="airline icon" style="width: 35px; height: 35px;">
+                {% elif flight.airline_name == "Asiana" %}
+                    <img src="../static/img/airline-profiles/OZ.png" class="me-3" alt="airline icon" style="width: 35px; height: 35px;">
+                {% elif flight.airline_name == "British Airways" %}
+                    <img src="../static/img/airline-profiles/BA.png" class="me-3" alt="airline icon" style="width: 35px; height: 35px;">
+                {% elif flight.airline_name == "China Southern" %}
+                    <img src="../static/img/airline-profiles/CZ.png" class="me-3" alt="airline icon" style="width: 35px; height: 35px;">
+                {% elif flight.airline_name == "Qatar Airways" %}
+                    <img src="../static/img/airline-profiles/QR.png" class="me-3" alt="airline icon" style="width: 35px; height: 35px;">
+                {% else %}
+                    <img src="../static/img/airline-profiles/default.png" class="me-3" alt="airline icon" style="width: 35px; height: 35px;">
                 {% endif %}
                 
-                <div>
-                    <h5>{{flight.dep_airport}} → {{flight.arr_airport}}</h5>
-                        {% if flight.status == "delayed" %}
+                <div class="container">
+                    <h5>{{flight.departure_time.strftime('%H:%M')}} - {{flight.arrival_time.strftime('%H:%M')}}</h5>
+                        {% if flight.status == "Delayed" %}
                             <span class="badge bg-warning">Delayed</span>
-                        {% elif flight.status == "upcoming" %}
+                        {% elif flight.status == "On time" %}
                             <span class="badge bg-success">On Time</span>
-                        {% elif flight.status == "in progress" %}
+                        {% elif flight.status == "In flight" %}
                             <span class="badge bg-info">In-Flight</span>
                         {% else %}
                             <span class="badge bg-secondary">Unknown</span>
@@ -43,6 +63,18 @@
                     
                     <p class="text-muted">{{flight.airline_name}}</p>
                 </div>
+                <div class="container">
+                    <h5>{{(flight.arrival_time - flight.departure_time)}}</h5>
+                    <p class="text-muted">{{flight.departure_airport}} → {{flight.arrival_airport}}</p>
+                </div>
+                <div class="container">
+                    <h5>${{flight.price}}</h5>
+                </div>
+                <div class="container">
+                    
+                    <button class="btn btn-lg btn-primary" href="">Select Flight</button>
+                </div>
+                
             </div>
         </div>
     {% endfor %}

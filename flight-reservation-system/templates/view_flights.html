@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+<!DOCTYPE html>
+<header>
+    {% block title %}<title>Flight Display</title>
+    <style>
+        th, td {
+            padding: 15px;
+        }
+    </style>{% endblock %}
+</header>
+
+<body>
+    {% block content %}
+    <div class="container col-md-8">
+        <h1>All Upcoming Flights</h1>
+        <table>
+        <th>Airline</th>
+        <th>Flight No.</th>
+        <th>From</th>
+        <th>To</th>
+        <th>Time</th>
+        {% for flight in data %}
+        <tr>
+            <td>{{flight.airline_name}}</td>
+            <td>{{flight.flight_num}}</td>
+            <td>{{flight.departure_airport}}</td>
+            <td>{{flight.arrival_airport}}</td>
+            <td>{{flight.departure_time}}</td>
+            {% if flight.status == "Delayed" %}
+                <td><span class="badge bg-warning">Delayed</span></td>
+            {% elif flight.status == "On time" %}
+                <td><span class="badge bg-success">On time</span></td>
+            {% endif %}
+        </tr>
+        {% endfor %}
+    </table>
+    </div>
+    
+    {% endblock %}
+    
+    
+</body>

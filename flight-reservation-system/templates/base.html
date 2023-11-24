@@ -3,13 +3,12 @@
 <head>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <!-- <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous"> -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css">
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}Flight Reservation System{% endblock %}</title>
 
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
-
-
 
 </head>
 <body>
@@ -17,8 +16,8 @@
 
 
     <nav class="shadow-sm navbar sticky-top navbar-expand-lg navbar-light bg-light">
-        <div class="container-fluid">
-          <a class="navbar-brand border border-2 rounded border-primary" style="padding:5px;" href="/home">Flight Reservation System</a>
+        <div class="container">
+          <a class="navbar-brand" style="padding:5px;" href="/home"><i class="bi-airplane" style="font-size: 2rem;"></i></a>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
           </button>
@@ -44,20 +43,25 @@
               </li>
             </ul>
             <ul class="navbar-nav ms-auto">
+                {% if session['permission'] == 'admin' %}
+                  <a class="btn btn-outline-dark" href="/admin/dashboard" role="button" style="margin-right: 10px">
+                      Admin Dashboard
+                  </a>
+                {% endif %}
                 {% if session['username'] %}
-                <a class="btn btn-outline-primary" href="/logout" role="button" style="margin-right: 10px">
-                    Account
-                </a>
+                  <a class="btn btn-outline-primary" href="/myAccount" role="button" style="margin-right: 10px">
+                      Account
+                  </a>
                 {% else %}
-                <a class="btn btn-outline-primary" href="/logout" role="button" style="margin-right: 10px">
-                    Register
-                </a>
+                  <a class="btn btn-outline-primary" href="/register" role="button" style="margin-right: 10px">
+                      Register
+                  </a>
                 {% endif %}
                 <a class="btn btn-primary" href="/logout" role="button">
                     {% if session['username'] %}
-                    Log out
+                      Log out
                     {% else %}
-                    Log in
+                      Log in
                     {% endif %}
                 </a>
             </ul>

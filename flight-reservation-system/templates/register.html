@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+<head>
+    <title>{% block title %}Register • Flight Reservation System{% endblock %}</title>
+</head>
+
+{% block content %}
+<div class="container shadow col-md-6 rounded" style="padding:30px; margin-top: 20px;">
+  <ul class="nav nav-pills mb-3 d-flex justify-content-center" id="pills-tab" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link active" id="pills-home-tab" data-bs-toggle="pill" data-bs-target="#pills-home" type="button" role="tab" aria-controls="pills-home" aria-selected="true">Customer</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="pills-profile-tab" data-bs-toggle="pill" data-bs-target="#pills-profile" type="button" role="tab" aria-controls="pills-profile" aria-selected="false">Booking Agent</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="pills-contact-tab" data-bs-toggle="pill" data-bs-target="#pills-contact" type="button" role="tab" aria-controls="pills-contact" aria-selected="false">Airline Staff</button>
+    </li>
+  </ul>
+  <hr>
+  <div class="tab-content" id="pills-tabContent">
+    <!-- customer form -->
+    <div class="tab-pane fade show active d-flex align-items-stretch" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">
+        <form class="row g-3">
+            <div class="col-md-6">
+              <label for="inputEmail4" class="form-label">Email</label>
+              <input type="email" class="form-control" id="inputEmail4" required>
+            </div>
+            <div class="col-md-6">
+              <label for="inputPassword4" class="form-label">Password</label>
+              <input type="password" class="form-control" id="inputPassword4" required>
+            </div>
+            <div class="col-12">
+              <label for="inputName" class="form-label">Name</label>
+              <input type="text" class="form-control" id="inputAddress" required>
+            </div>
+            <div class="col-6">
+              <label for="inputAddress2" class="form-label">Building Number</label>
+              <input type="text" class="form-control" id="inputAddress2" placeholder="1024" required>
+            </div>
+            <div class="col-6">
+                <label for="inputAddress2" class="form-label">Street Name</label>
+                <input type="text" class="form-control" id="inputAddress2" placeholder="W. Main street" required>
+              </div>
+            <div class="col-md-6">
+              <label for="inputCity" class="form-label">City</label>
+              <input type="text" class="form-control" id="inputCity" required>
+            </div>
+            <div class="col-md-4">
+                <label for="inputState" class="form-label">State</label>
+                <select id="inputState" class="form-select" required>
+                    {% for state in states %}
+                    <option value="{{ state.abbr }}">{{ state.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+              <label for="inputZip" class="form-label">Phone</label>
+              <input type="text" class="form-control" id="inputZip" required>
+            </div>
+            <div class="col-md-3">
+                <label for="inputZip" class="form-label">Passport Number</label>
+                <input type="text" class="form-control" id="inputZip" required>
+            </div>
+            <div class="col-md-3">
+                <label for="inputZip" class="form-label">Passport Expiration</label>
+                <input type="date" class="form-control" id="inputZip" required>
+            </div>
+            <div class="col-md-6">
+                <label for="inputZip" class="form-label">Country of Citizenship</label>
+                <input type="text" class="form-control" id="inputZip" required>
+            </div>
+            <div class="col-md-2">
+                <label for="inputZip" class="form-label">Date of Birth</label>
+                <input type="text" class="form-control" id="inputZip" required>
+            </div>
+            <div class="col-12">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="gridCheck" required>
+                <label class="form-check-label" for="gridCheck">
+                  Check me out
+                </label>
+              </div>
+            </div>
+            <div class="col-12">
+              <button type="submit" class="btn btn-primary">Sign up</button>
+            </div>
+          </form>
+    </div>
+    <!-- booking agent form-->
+    <div class="tab-pane fade d-flex align-items-stretch" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab">
+
+    </div>
+    <!-- airline staff form-->
+    <div class="tab-pane fade d-flex align-items-stretch" id="pills-contact" role="tabpanel" aria-labelledby="pills-contact-tab">
+
+    </div>
+  </div>
+</div>
+{% endblock %}

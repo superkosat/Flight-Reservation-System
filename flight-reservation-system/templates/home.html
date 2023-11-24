@@ -3,14 +3,17 @@
     <title>{% block title %}Home • Flight Reservation System{% endblock %}</title>
 </head>
 <body>
-
     {% block content %}
-    <div class="container">
-        <h1 class="text-muted">permission: {{session['permission']}}</h1>
-    </div>
-    <div class="shadow-lg container rounded" style="padding: 40px">
+    <style>
+      body{
+        background-image: url('../static/img/plane0.jpg');
+        background-size: cover; 
+        background-position: center;
+      }
+    </style>
+    <div class="shadow-lg container rounded col-md-8" style="margin-top: 5%; margin-bottom:5%; padding: 40px; background-color: rgba(255, 255, 255, 0.5);">
         {% if is_logged_in() %}
-        <h1>Welcome. Search...</h1>
+        <h1>Welcome, {% if session['user_type'] == 'booking_agent'%}Agent #{% endif %}{{session['name']}}</h1>
         {% else %}
         <h1>Search flights...</h1>
         {% endif %}
@@ -31,32 +34,9 @@
                 <label for="arrAirport" class="form-label">Arrival Airport</label>
                 <input name="arrivalAirport" type="text" class="form-control rounded-pill form-control-lg" id="arrAirport" placeholder="PVG">
               </div>
-            <div class="col-md-2">
-                <label for="inputYear" class="form-label">Year</label>
-                <select name = "year" id="inputYear" class="form-select rounded-pill form-control-lg">
-                  <option selected>-</option>
-                  <option>2023</option>
-                  <option>2024</option>
-                  <option>2025</option>
-                </select>
-            </div>
-            <div class="col-md-2">
-                <label for="inputMonth" class="form-label">Month</label>
-                <select name="month" id="inputMonth" class="form-select rounded-pill form-control-lg">
-                <option selected>-</option>
-                {% for i in range(1, 13) %}
-                    <option>{{i}}</option>
-                {% endfor %}
-              </select>
-            </div>
-            <div class="col-md-2">
-                <label for="inputDay" class="form-label">Day</label>
-                <select name="day" id="inputDay" class="form-select rounded-pill form-control-lg">
-                  <option selected>-</option>
-                {% for j in range(1, 32) %}
-                  <option>{{j}}</option>
-                {% endfor %}
-              </select>
+            <div class="col-md-3">
+                <label for="inputYear" class="form-label">Date</label>
+                <input name = "flightDate" type="date" id="inputYear" class="form-control rounded-pill form-control-lg">
             </div>
             {% if error %}
                 <p class="text-danger">{{error}}</p>
@@ -68,6 +48,5 @@
     </div>
     {% endblock %}
     
-    {% block footer %}{% endblock %}
-
+    
 </body>

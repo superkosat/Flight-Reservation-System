@@ -36,6 +36,7 @@ def home():
 def search():
     return
 
+#route to query database for flights from home page regardless of user status
 @app.route('/searchFlights', methods=['GET', 'POST'])
 def searchFlights():
     departureCity = request.form['departureCity']
@@ -50,16 +51,16 @@ def searchFlights():
     params = []
 
     if departureCity:
-        conditions.append("a.city = %s")
+        conditions.append("a.airport_city = %s")
         params.append(departureCity)
     if arrivalCity:
-        conditions.append("b.city = %s")
+        conditions.append("b.airport_city = %s")
         params.append(arrivalCity)
     if departureAirport:
-        conditions.append("flight.dep_airport = %s")
+        conditions.append("flight.departure_airport = %s")
         params.append(departureAirport)
     if arrivalAirport:
-        conditions.append("flight.arr_airport = %s")
+        conditions.append("flight.arrival_airport = %s")
         params.append(arrivalAirport)
 
     error = None
@@ -70,11 +71,15 @@ def searchFlights():
 
     cursor = conn.cursor()
 
+    '''
+    SELECT 
+    '''
+
     query = '''
-        SELECT flight.*, a.city AS departure_city, b.city AS arrival_city
+        SELECT flight.*, a.airport_city AS departure_city, b.airport_city AS arrival_city
         FROM flight 
-        INNER JOIN airport AS a ON flight.dep_airport = a.name 
-        INNER JOIN airport AS b ON flight.arr_airport = b.name 
+        INNER JOIN airport AS a ON flight.departure_airport = a.airport_name 
+        INNER JOIN airport AS b ON flight.arrival_airport = b.airport_name 
         WHERE {}
     '''.format(" AND ".join(conditions))
 
@@ -90,10 +95,12 @@ def searchFlights():
         error = 'No flights found'
         return render_template('search_display.html', error=error)
 
+#route for user login, renders login template
 @app.route('/login')
 def login():
     return render_template('login.html')
 
+#route for user logout, destroys session
 @app.route('/logout')
 def logout():
     session.clear()
@@ -108,35 +115,116 @@ def loginAuth():
     #SELECT * FROM customer WHERE email = %s AND password = %s
     cursor = conn.cursor()
     query = '''
-        SELECT 'customer' AS user_type, email, password FROM customer WHERE email = %s AND password = %s
+        SELECT 'customer' AS user_type, email, password, name FROM customer WHERE email = %s AND password = %s
         UNION
-        SELECT 'airline_staff' AS user_type, username AS email, password FROM airline_staff WHERE username = %s AND password = %s
+        SELECT 'airline_staff' AS user_type, username AS email, password, first_name FROM airline_staff WHERE username = %s AND password = %s
         UNION
-        SELECT 'booking_agent' AS user_type, email, password FROM booking_agent WHERE email = %s AND password = %s
+        SELECT 'booking_agent' AS user_type, email, password, booking_agent_id FROM booking_agent WHERE email = %s AND password = %s
     '''
     cursor.execute(query, (username, password, username, password, username, password))
 
     data = cursor.fetchone()
 
-    cursor.close()
     error = None
     if (data):
         session['username'] = username
-        session['permission'] = data['user_type']
+        session['user_type'] = data['user_type']
+        session['name'] = data['name']
+        if session['user_type'] == 'airline_staff':
+            query = "SELECT permission_type FROM permission INNER JOIN airline_staff ON airline_staff.username = permission.username WHERE airline_staff.username = %s"
+            cursor.execute(query, (username))
+            data = cursor.fetchone()
+            session['permission'] = data['permission_type']
+        cursor.close()
         return redirect(url_for('home'))
     else:
+        cursor.close()
         error = 'Invalid username or password'
         return render_template('login.html', error=error)
 
+#route to render the new user registration template
 @app.route('/register')
 def register():
-    return render_template('register.html')
+    states = [
+    {"abbr": "AL", "name": "Alabama"},
+    {"abbr": "AK", "name": "Alaska"},
+    {"abbr": "AZ", "name": "Arizona"},
+    {"abbr": "AR", "name": "Arkansas"},
+    {"abbr": "CA", "name": "California"},
+    {"abbr": "CO", "name": "Colorado"},
+    {"abbr": "CT", "name": "Connecticut"},
+    {"abbr": "DE", "name": "Delaware"},
+    {"abbr": "FL", "name": "Florida"},
+    {"abbr": "GA", "name": "Georgia"},
+    {"abbr": "HI", "name": "Hawaii"},
+    {"abbr": "ID", "name": "Idaho"},
+    {"abbr": "IL", "name": "Illinois"},
+    {"abbr": "IN", "name": "Indiana"},
+    {"abbr": "IA", "name": "Iowa"},
+    {"abbr": "KS", "name": "Kansas"},
+    {"abbr": "KY", "name": "Kentucky"},
+    {"abbr": "LA", "name": "Louisiana"},
+    {"abbr": "ME", "name": "Maine"},
+    {"abbr": "MD", "name": "Maryland"},
+    {"abbr": "MA", "name": "Massachusetts"},
+    {"abbr": "MI", "name": "Michigan"},
+    {"abbr": "MN", "name": "Minnesota"},
+    {"abbr": "MS", "name": "Mississippi"},
+    {"abbr": "MO", "name": "Missouri"},
+    {"abbr": "MT", "name": "Montana"},
+    {"abbr": "NE", "name": "Nebraska"},
+    {"abbr": "NV", "name": "Nevada"},
+    {"abbr": "NH", "name": "New Hampshire"},
+    {"abbr": "NJ", "name": "New Jersey"},
+    {"abbr": "NM", "name": "New Mexico"},
+    {"abbr": "NY", "name": "New York"},
+    {"abbr": "NC", "name": "North Carolina"},
+    {"abbr": "ND", "name": "North Dakota"},
+    {"abbr": "OH", "name": "Ohio"},
+    {"abbr": "OK", "name": "Oklahoma"},
+    {"abbr": "OR", "name": "Oregon"},
+    {"abbr": "PA", "name": "Pennsylvania"},
+    {"abbr": "RI", "name": "Rhode Island"},
+    {"abbr": "SC", "name": "South Carolina"},
+    {"abbr": "SD", "name": "South Dakota"},
+    {"abbr": "TN", "name": "Tennessee"},
+    {"abbr": "TX", "name": "Texas"},
+    {"abbr": "UT", "name": "Utah"},
+    {"abbr": "VT", "name": "Vermont"},
+    {"abbr": "VA", "name": "Virginia"},
+    {"abbr": "WA", "name": "Washington"},
+    {"abbr": "WV", "name": "West Virginia"},
+    {"abbr": "WI", "name": "Wisconsin"},
+    {"abbr": "WY", "name": "Wyoming"},
+    {"abbr": "PR", "name": "Puerto Rico"},
+    {"abbr": "GU", "name": "Guam"},
+    # Add other territories or states as needed
+    ]
+    return render_template('register.html', states=states)
+
+#route to insert new customer user into database
+@app.route('/registerCustomer', methods=['GET', 'POST'])
+def registerUser():
+    cursor = conn.cursor()
+    query = 'INSERT'
+
+#route to insert new booking agent user into database
+@app.route('/registerBookingAgent', methods=['GET', 'POST'])
+def registerBookingAgent():
+    cursor = conn.cursor()
+    query = 'INSERT'
+
+#route to insert new airline staff user into database
+@app.route('/registerAirlineStaff', methods=['GET', 'POST'])
+def registerAirlineStaff():
+    cursor = conn.cursor()
+    query = 'INSERT'
 
 #Define route to display all upcoming flights in the database
 @app.route('/displayUpcoming')
 def displayUpcoming():
     cursor = conn.cursor()
-    query = 'SELECT airline_name, flight_num, dep_airport, arr_airport, status FROM flight WHERE status IN ("upcoming", "delayed")'
+    query = 'SELECT airline_name, flight_num, departure_airport, arrival_airport, status, departure_time FROM flight WHERE status IN ("On time", "Delayed") ORDER BY departure_time'
     cursor.execute(query)
 
     data = cursor.fetchall()
@@ -144,24 +232,44 @@ def displayUpcoming():
     cursor.close()
     error = None
     if (data):
-        return render_template('display_upcoming.html', data=data)
+        return render_template('view_flights.html', data=data)
     else:
         error = 'No upcoming flights found'
         return render_template('index.html', error=error)
 
 #define route to display purchased flights
-#MUST BE LOGGED IN WITH CUSTOMER PERMISSION
+#MUST BE LOGGED IN AS CUSTOMER
 @app.route('/myFlights')
-def my_flights():
-    return render_template('view_my_flights.html')
-
-
+def myFlights():
+    if (is_logged_in() and session['user_type'] == 'customer'):
+        return render_template('view_customer_flights.html')
+    else:
+        return redirect(url_for('home'))
+    
+@app.route('/myAccount')
+def myAccount():
+    if (is_logged_in()):
+        return render_template('account_display.html')
+    else:
+        return redirect(url_for('login'))
+    
+#route to render admin dashboard for authenticated staff with admin permissions
+@app.route('/admin/dashboard')
+def adminDashboard():
+    if (is_logged_in() and session['permission'] == 'admin'):
+        return "Access Granted"
+    else:
+        return "Access Denied"
 
 
 ### error handling ###
 @app.errorhandler(404)  
 def not_found(e):
     return render_template('404.html')
+
+@app.errorhandler(403)  
+def not_found(e):
+    return render_template('403.html')
 
 @app.errorhandler(400)  
 def not_found(e):
