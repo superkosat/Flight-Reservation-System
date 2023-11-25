@@ -1,12 +1,31 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container shadow col-md-8" style="margin-top: 0px;">
-    <h1>Test area</h1>
-    <hr class="my-2">
+<div class="container col-md-8" style="margin-top: 0px;">
+    <div class="container" style="margin-top: 5%;">
+        <form action="/searchFlights" method="POST">
+            <div class="row">
+                <div class="col">
+                  <input name="departureCity" type="text" class="form-control" placeholder="Where from?" aria-label="Departure city">
+                </div>
+                <div class="col">
+                  <input name="arrivalCity" type="text" class="form-control" placeholder="Where to?" aria-label="Arrival city">
+                </div>
+                <div class="col">
+                    <input name="flightDate" type="date" class="form-control" aria-label="Date">
+                </div>
+              </div>
+              <div class="col-12" style="margin-top: 30px;">
+                <button type="submit" class="btn btn-success btn-lg">Search</button>
+              </div>
+              <input name="departureAirport" hidden>
+              <input name="arrivalAirport" hidden>
+        </form>
+    </div>
+    <hr>
     {% for flight in data %}
         <div class="container rounded border border-2 border-light" style="padding:10px; padding-top: 10px;">
-            <div class="d-flex align-items-center" style="padding: 5px">
+            <div class="d-flex align-items-center justify-content-center" style="padding: 5px"> <!--d-flex align-items-center justify-content-center -->
                 {% if flight.airline_name == "American" %}
                     <img src="../static/img/airline-profiles/AA.png" class="me-3" alt="airline icon" style="width: 35px; height: 35px;">
                 {% elif flight.airline_name == "Air Canada" %}
@@ -51,15 +70,7 @@
                 
                 <div class="container">
                     <h5>{{flight.departure_time.strftime('%H:%M')}} - {{flight.arrival_time.strftime('%H:%M')}}</h5>
-                        {% if flight.status == "Delayed" %}
-                            <span class="badge bg-warning">Delayed</span>
-                        {% elif flight.status == "On time" %}
-                            <span class="badge bg-success">On Time</span>
-                        {% elif flight.status == "In flight" %}
-                            <span class="badge bg-info">In-Flight</span>
-                        {% else %}
-                            <span class="badge bg-secondary">Unknown</span>
-                        {% endif %}
+                        
                     
                     <p class="text-muted">{{flight.airline_name}}</p>
                 </div>
@@ -68,13 +79,30 @@
                     <p class="text-muted">{{flight.departure_airport}} → {{flight.arrival_airport}}</p>
                 </div>
                 <div class="container">
-                    <h5>${{flight.price}}</h5>
+                    {% if flight.status == "Delayed" %}
+                            <h5 class="text-warning">Delayed</h5>
+                        {% elif flight.status == "On time" %}
+                            <h5 class="text-success">On Time</h5>
+                        {% elif flight.status == "In flight" %}
+                            <h5 class="text-info">In-Flight</h5>
+                        {% else %}
+                            <h5 class="text-secondary">Unknown</h5>
+                        {% endif %}
+                        <p class="text-muted">Flight {{flight.flight_num}}</p>
                 </div>
                 <div class="container">
-                    
-                    <button class="btn btn-lg btn-primary" href="">Select Flight</button>
+                    <h5>${{flight.price}}</h5>
                 </div>
                 
+                {% if flight.status != "In flight" %}
+                <div class="container">
+                    <button class="btn btn-lg btn-primary" href="">Select Flight</button>
+                </div>
+                {% else %}
+                <div class="container">
+                    <button class="btn btn-lg btn-primary" href="" disabled>Select Flight</button>
+                </div>
+                {% endif %}
             </div>
         </div>
     {% endfor %}
@@ -83,7 +111,7 @@
     {% if error %}
         <p class="text-danger">{{error}}</p>
     {% else %}
-        <p class="text-muted">Search returned N results</p>
+        <p class="text-muted">Search returned {{ data|length }} results</p>
     {% endif %}
 </div>
 {% endblock %}

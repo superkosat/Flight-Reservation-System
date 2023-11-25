@@ -27,7 +27,7 @@
                 <a class="nav-link" href="/home">Home</a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="/test">Test</a>
+                <a class="nav-link" href="/test">Destinations</a>
               </li>
               <li class="nav-item">
                 <a class="nav-link" href="#">Pricing</a>
@@ -45,7 +45,7 @@
             <ul class="navbar-nav ms-auto">
                 {% if session['permission'] == 'admin' %}
                   <a class="btn btn-outline-dark" href="/admin/dashboard" role="button" style="margin-right: 10px">
-                      Admin Dashboard
+                      <i class="bi-shield-lock"></i> Admin Dashboard
                   </a>
                 {% endif %}
                 {% if session['username'] %}

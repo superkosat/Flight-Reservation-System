@@ -43,9 +43,7 @@ def searchFlights():
     arrivalCity = request.form['arrivalCity']
     departureAirport = request.form['departureAirport']
     arrivalAirport = request.form['arrivalAirport']
-    #year = request.form['year']
-    #month = request.form['month']
-    #day = request.form['day']
+    flightDate = request.form['flightDate']
 
     conditions = []
     params = []
@@ -62,18 +60,20 @@ def searchFlights():
     if arrivalAirport:
         conditions.append("flight.arrival_airport = %s")
         params.append(arrivalAirport)
+    if flightDate:
+        start_date = flightDate + " 00:00:00"
+        end_date = flightDate + " 23:59:59"
+        conditions.append("flight.departure_time BETWEEN %s AND %s")
+        params.extend([start_date, end_date])
 
     error = None
 
-    if not any([departureCity, arrivalCity, departureAirport, arrivalAirport]):
+    if not any([departureCity, arrivalCity, departureAirport, arrivalAirport, flightDate]):
         error = "Please fill at least one field"
         return render_template('home.html', error=error)
 
     cursor = conn.cursor()
 
-    '''
-    SELECT 
-    '''
 
     query = '''
         SELECT flight.*, a.airport_city AS departure_city, b.airport_city AS arrival_city
