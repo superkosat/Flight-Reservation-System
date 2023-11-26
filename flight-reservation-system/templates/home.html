@@ -13,7 +13,7 @@
     </style>
     <div class="shadow-lg container rounded col-md-8" style="margin-top: 5%; margin-bottom:5%; padding: 40px; background-color: rgba(255, 255, 255, 0.5);">
         {% if is_logged_in() %}
-          <h1>Welcome, {% if session['user_type'] == 'booking_agent'%}Agent #{% endif %}{{session['name']}}</h1>
+          <h1>Welcum, {% if session['user_type'] == 'booking_agent'%}Agent #{% endif %}{{session['name']}}</h1>
         {% else %}
           <h1>Search flights...</h1>
         {% endif %}

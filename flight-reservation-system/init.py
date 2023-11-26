@@ -6,7 +6,7 @@ app = Flask(__name__)
 #Establish connection to MySQL server
 conn = pymysql.connect(host='localhost',
                        user='root',
-                       password='',
+                       password='password',
                        db='flight_reservation_system',
                        charset='utf8mb4',
                        cursorclass=pymysql.cursors.DictCursor)
