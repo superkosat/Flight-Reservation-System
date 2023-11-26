@@ -1,4 +1,4 @@
-from flask import Flask, render_template, session, request, url_for, redirect
+from flask import Flask, render_template, session, request, url_for, redirect, flash
 import pymysql.cursors
 
 app = Flask(__name__)
@@ -197,28 +197,138 @@ def register():
     {"abbr": "WI", "name": "Wisconsin"},
     {"abbr": "WY", "name": "Wyoming"},
     {"abbr": "PR", "name": "Puerto Rico"},
-    {"abbr": "GU", "name": "Guam"},
-    # Add other territories or states as needed
+    {"abbr": "GU", "name": "Guam"}
     ]
-    return render_template('register.html', states=states)
+
+    cursor = conn.cursor()
+    query = 'SELECT * FROM airline;'
+    cursor.execute(query)
+
+    data = cursor.fetchall()
+
+    cursor.close()
+
+    return render_template('register.html', states=states, data=data)
 
 #route to insert new customer user into database
 @app.route('/registerCustomer', methods=['GET', 'POST'])
-def registerUser():
+def registerCustomer():
+    email = request.form['email']
+    password = request.form['password']
+    name = request.form['name']
+    buildingNumber = request.form['buildingNumber']
+    streetName = request.form['streetName']
+    city = request.form['city']
+    state = request.form['state']
+    phone = request.form['phone']
+    passportNumber = request.form['passportNumber']
+    passportExpiration = request.form['passportExpiration']
+    country = request.form['country']
+    dateOfBirth = request.form['dateOfBirth']
+
+
     cursor = conn.cursor()
-    query = 'INSERT'
+    query = '''
+    INSERT INTO customer(`email`, `name`, `password`, `building_number`, `street`, `city`, `state`, `phone_number`, `passport_number`, `passport_expiration`, `passport_country`, `date_of_birth`)
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    '''
+    values = (email, name, password, buildingNumber, streetName, city, state, phone, passportNumber, passportExpiration, country, dateOfBirth)
+
+    try:
+        # Execute the query
+        cursor.execute(query, values)
+        conn.commit()
+        cursor.close()
+
+        # Redirect or return a success message
+        message = "success"
+        flash(message)
+        return redirect(url_for('register'))
+    except Exception as e:
+        # Rollback changes if insertion produces an error
+        conn.rollback()
+        #error = f"Error: {e}"
+        message = "error-customer-in-use"
+        flash(message)
+        return redirect(url_for('register'))
 
 #route to insert new booking agent user into database
 @app.route('/registerBookingAgent', methods=['GET', 'POST'])
 def registerBookingAgent():
+    email = request.form['email']
+    password = request.form['password']
+    airline = request.form['airline']
+
     cursor = conn.cursor()
-    query = 'INSERT'
+    query = "SELECT MAX(booking_agent_id) FROM booking_agent"
+
+    try:
+        cursor.execute(query)
+        result = cursor.fetchone()
+        agentID = result['MAX(booking_agent_id)'] + 1
+        
+        query = '''
+        INSERT INTO booking_agent(`email`, `password`, `booking_agent_id`)
+        VALUES(%s, %s, %s)
+        '''
+
+        values = (email, password, agentID)
+        cursor.execute(query, values)
+
+        query= '''
+        INSERT INTO booking_agent_work_for(`email`, `airline_name`)
+        VALUES(%s, %s)
+        '''
+
+        values = (email, airline)
+        cursor.execute(query, values)
+
+        conn.commit()
+        cursor.close()
+        message = "success"
+        flash(message)
+        return redirect(url_for('register'))
+    except Exception as e:
+        conn.rollback()
+        message = f"Error: {e}"
+        flash(message)
+        return message#redirect(url_for('register'))
+    
+
 
 #route to insert new airline staff user into database
 @app.route('/registerAirlineStaff', methods=['GET', 'POST'])
 def registerAirlineStaff():
+    username = request.form['username']
+    password = request.form['password']
+    firstName = request.form['firstName']
+    lastName = request.form['lastName']
+    dateOfBirth = request.form['dateOfBirth']
+    airline = request.form['airline']
+
     cursor = conn.cursor()
-    query = 'INSERT'
+    query = '''
+        INSERT INTO airline_staff(`username`,`password`,`first_name`,`last_name`,`date_of_birth`,`airline_name`)
+        VALUES (%s, %s, %s, %s, %s, %s);
+    '''
+    values = (username, password, firstName, lastName, dateOfBirth, airline)
+
+    try:
+        cursor.execute(query, values)
+        conn.commit()
+        cursor.close()
+
+        # Redirect or return a success message
+        message = "success"
+        flash(message)
+        return redirect(url_for('register'))
+    except Exception as e:
+        conn.rollback()
+        error = f"Error: {e}"
+        message = "error-staff-in-use"
+        flash(message)
+        return error#redirect(url_for('register'))
+
 
 #Define route to display all upcoming flights in the database
 @app.route('/displayUpcoming')
@@ -238,11 +348,29 @@ def displayUpcoming():
         return render_template('index.html', error=error)
 
 #define route to display purchased flights
-#MUST BE LOGGED IN AS CUSTOMER
+#MUST BE LOGGED IN AS CUSTOMER OR BOOKING AGENT
 @app.route('/myFlights')
 def myFlights():
     if (is_logged_in() and session['user_type'] == 'customer'):
-        return render_template('view_customer_flights.html')
+        cursor = conn.cursor()
+        query = '''
+        SELECT * FROM flight
+        NATURAL JOIN purchases
+        NATURAL JOIN ticket
+        WHERE purchases.customer_email = %s
+        '''
+        value = (session['username'])
+
+        cursor.execute(query, value)
+        data = cursor.fetchall()
+        cursor.close()
+        error=None
+        if (data):
+            return render_template('view_customer_flights.html', data=data)
+        else:
+            error = 'No flights found'
+            return render_template('view_customer_flights.html', error=error)
+    
     else:
         return redirect(url_for('home'))
     
@@ -253,13 +381,18 @@ def myAccount():
     else:
         return redirect(url_for('login'))
     
-#route to render admin dashboard for authenticated staff with admin permissions
+#TODO route to render admin dashboard for authenticated staff with admin permissions
 @app.route('/admin/dashboard')
 def adminDashboard():
     if (is_logged_in() and session['permission'] == 'admin'):
         return "Access Granted"
     else:
         return "Access Denied"
+
+#TODO implement orute to display top destinations
+@app.route('/displayDestinations')
+def displayDestinations():
+    return render_template('destinations_display.html')
 
 
 ### error handling ###

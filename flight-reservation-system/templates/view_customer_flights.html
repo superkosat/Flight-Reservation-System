@@ -1,4 +1,92 @@
 {% extends "base.html" %}
 
 {% block content %}
+<div class="container col-md-8" style="margin-top: 0px;">
+    <div class="container" style="margin-top: 5%;">
+        <h3>Your flights, {{ session['name'] }}</h5>
+    </div>
+    <hr>
+    {% for flight in data %}
+        <div class="container rounded border border-2 border-light" style="padding:10px; padding-top: 10px;">
+            <div class="d-flex align-items-center justify-content-center" style="padding: 5px"> <!--d-flex align-items-center justify-content-center -->
+                {% if flight.airline_name == "American" %}
+                    <img src="../static/img/airline-profiles/AA.png" class="me-3" alt="airline icon" style="width: 35px; height: 35px;">
+                {% elif flight.airline_name == "Air Canada" %}
+                    <img src="../static/img/airline-profiles/AC.png" class="me-3" alt="airline icon" style="width: 35px; height: 35px;">
+                {% elif flight.airline_name == "Alaskan" %}
+                    <img src="../static/img/airline-profiles/AS.png" class="me-3" alt="airline icon" style="width: 35px; height: 35px;">
+                {% elif flight.airline_name == "Air China" %}
+                    <img src="../static/img/airline-profiles/CA.png" class="me-3" alt="airline icon" style="width: 35px; height: 35px;">
+                {% elif flight.airline_name == "Cathay Pacific" %}
+                    <img src="../static/img/airline-profiles/CX.png" class="me-3" alt="airline icon" style="width: 35px; height: 35px;">
+                {% elif flight.airline_name == "China Eastern" %}
+                    <img src="../static/img/airline-profiles/MU.png" class="me-3" alt="airline icon" style="width: 35px; height: 35px;">
+                {% elif flight.airline_name == "Emirates" %}
+                    <img src="../static/img/airline-profiles/EK.png" class="me-3" alt="airline icon" style="width: 35px; height: 35px;">
+                {% elif flight.airline_name == "Lufthansa" %}
+                    <img src="../static/img/airline-profiles/LH.png" class="me-3" alt="airline icon" style="width: 35px; height: 35px;">
+                {% elif flight.airline_name == "Singapore Airlines" %}
+                    <img src="../static/img/airline-profiles/SQ.png" class="me-3" alt="airline icon" style="width: 35px; height: 35px;">
+                {% elif flight.airline_name == "United" %}
+                    <img src="../static/img/airline-profiles/UA.png" class="me-3" alt="airline icon" style="width: 35px; height: 35px;">
+                {% elif flight.airline_name == "Delta Air Lines" %}
+                    <img src="../static/img/airline-profiles/DL.png" class="me-3" alt="airline icon" style="width: 35px; height: 35px;">
+                {% elif flight.airline_name == "Spring" %}
+                    <img src="../static/img/airline-profiles/9C.png" class="me-3" alt="airline icon" style="width: 35px; height: 35px;">
+                {% elif flight.airline_name == "JAL" %}
+                    <img src="../static/img/airline-profiles/JL.png" class="me-3" alt="airline icon" style="width: 35px; height: 35px;">
+                {% elif flight.airline_name == "Korean Air" %}
+                    <img src="../static/img/airline-profiles/KE.png" class="me-3" alt="airline icon" style="width: 35px; height: 35px;">
+                {% elif flight.airline_name == "Air France" %}
+                    <img src="../static/img/airline-profiles/AF.png" class="me-3" alt="airline icon" style="width: 35px; height: 35px;">
+                {% elif flight.airline_name == "Asiana" %}
+                    <img src="../static/img/airline-profiles/OZ.png" class="me-3" alt="airline icon" style="width: 35px; height: 35px;">
+                {% elif flight.airline_name == "British Airways" %}
+                    <img src="../static/img/airline-profiles/BA.png" class="me-3" alt="airline icon" style="width: 35px; height: 35px;">
+                {% elif flight.airline_name == "China Southern" %}
+                    <img src="../static/img/airline-profiles/CZ.png" class="me-3" alt="airline icon" style="width: 35px; height: 35px;">
+                {% elif flight.airline_name == "Qatar Airways" %}
+                    <img src="../static/img/airline-profiles/QR.png" class="me-3" alt="airline icon" style="width: 35px; height: 35px;">
+                {% else %}
+                    <img src="../static/img/airline-profiles/default.png" class="me-3" alt="airline icon" style="width: 35px; height: 35px;">
+                {% endif %}
+                
+                <div class="container">
+                    <h5>{{flight.departure_time.strftime('%H:%M')}} - {{flight.arrival_time.strftime('%H:%M')}}</h5>
+                        
+                    
+                    <p class="text-muted">{{flight.airline_name}}</p>
+                </div>
+                <div class="container">
+                    <h5>{{(flight.arrival_time - flight.departure_time)}}</h5>
+                    <p class="text-muted">{{flight.departure_airport}} → {{flight.arrival_airport}}</p>
+                </div>
+                <div class="container">
+                    {% if flight.status == "Delayed" %}
+                            <h5 class="text-warning">Delayed</h5>
+                        {% elif flight.status == "On time" %}
+                            <h5 class="text-success">On Time</h5>
+                        {% elif flight.status == "In flight" %}
+                            <h5 class="text-info">In-Flight</h5>
+                        {% else %}
+                            <h5 class="text-secondary">Unknown</h5>
+                        {% endif %}
+                        <p class="text-muted">Flight {{flight.flight_num}}</p>
+                </div>
+                <div class="container">
+                    <h5>{{flight.purchase_date}}</h5>
+                    <p class="text-muted">Date of purchase</p>
+                </div>
+                
+            </div>
+        </div>
+    {% endfor %}
+
+
+    {% if error %}
+        <p class="text-danger">{{error}}</p>
+    {% else %}
+        <p class="text-muted">Search returned {{ data|length }} results</p>
+    {% endif %}
+</div>
 {% endblock %}

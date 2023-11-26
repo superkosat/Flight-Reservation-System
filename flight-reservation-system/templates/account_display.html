@@ -26,20 +26,26 @@
     <div class="row">
         <div class="col-3">
           <div class="list-group" id="list-tab" role="tablist">
-            <a class="list-group-item list-group-item-action active" id="list-home-list" data-bs-toggle="list" href="#list-home" role="tab" aria-controls="list-home"><i class="bi-house-fill" style="font-size: 1rem;"></i>  Home</a>
-            <a class="list-group-item list-group-item-action" id="list-profile-list" data-bs-toggle="list" href="#list-profile" role="tab" aria-controls="list-profile"><i class="bi-person-fill" style="font-size: 1.1rem;"></i>  Profile</a>
-            <a class="list-group-item list-group-item-action" id="list-messages-list" data-bs-toggle="list" href="#list-messages" role="tab" aria-controls="list-messages"><i class="bi-chat-fill" style="font-size: 1rem;"></i>  Messages</a>
-            <a class="list-group-item list-group-item-action" id="list-settings-list" data-bs-toggle="list" href="#list-settings" role="tab" aria-controls="list-settings"><i class="bi-gear-fill" style="font-size: 1rem;"></i>  Settings</a>
+            <a class="list-group-item list-group-item-action active" id="list-profile-list" data-bs-toggle="list" href="#list-profile" role="tab" aria-controls="list-profile"><i class="bi-person-fill" style="font-size: 1.1rem;"></i>  Profile</a>
+            {% if session['user_type'] == 'customer' %}
+              <a class="list-group-item list-group-item-action" id="list-messages-list" data-bs-toggle="list" href="#list-messages" role="tab" aria-controls="list-messages"><i class="bi-bar-chart-fill" style="font-size: 1rem;"></i>  My Spending</a>
+              <a class="list-group-item list-group-item-action" id="list-settings-list" data-bs-toggle="list" href="#list-settings" role="tab" aria-controls="list-settings"><i class="bi-airplane-fill" style="font-size: 1rem;"></i>  My Flights</a>
+            {% elif session['user_type'] == 'booking_agent' %}
+              <a class="list-group-item list-group-item-action" id="list-messages-list" data-bs-toggle="list" href="#list-messages" role="tab" aria-controls="list-messages"><i class="bi-cash-coin" style="font-size: 1rem;"></i>  My Commissions</a>
+              <a class="list-group-item list-group-item-action" id="list-settings-list" data-bs-toggle="list" href="#list-settings" role="tab" aria-controls="list-settings"><i class="bi-people-fill" style="font-size: 1rem;"></i>  Top Customers</a>
+            {% elif session['user_type'] == 'airline_staff' %}
+
+            {% endif %}
+            
           </div>
         </div>
         <div class="col-9">
           <div class="tab-content" id="nav-tabContent">
-            <div class="tab-pane fade show active" id="list-home" role="tabpanel" aria-labelledby="list-home-list">
-                <div class="container rounded" style="background-color: antiquewhite;">
-                    
-                </div>
+            <div class="tab-pane fade show active" id="list-profile" role="tabpanel" aria-labelledby="list-profile-list">
+              <div class="container rounded">
+                <p>test</p>
+              </div>
             </div>
-            <div class="tab-pane fade" id="list-profile" role="tabpanel" aria-labelledby="list-profile-list">...</div>
             <div class="tab-pane fade" id="list-messages" role="tabpanel" aria-labelledby="list-messages-list">...</div>
             <div class="tab-pane fade" id="list-settings" role="tabpanel" aria-labelledby="list-settings-list">...</div>
           </div>
