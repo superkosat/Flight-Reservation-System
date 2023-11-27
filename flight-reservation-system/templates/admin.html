@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+<head>
+    <title>{% block title %}Administrator Functions • Flight Reservation System{% endblock %}</title>
+</head>
+
+{% block content %}
+<div class="container shadow col-md-6 rounded" style="padding:30px; margin-top: 20px;">
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      {% for message in messages %}
+          {% if message == "error-invalid-info" %}
+            <div class="alert alert-danger" role="alert">
+              Error Finalizing: Invalid info
+            </div>
+          {% elif message == "success" %}
+            <div class="alert alert-success" role="alert">
+              Addition Successful!
+            </div>
+          {% endif %}
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <ul class="nav nav-pills mb-3 d-flex justify-content-center" id="pills-tab" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link active" id="pills-home-tab" data-bs-toggle="pill" data-bs-target="#pills-home" type="button" role="tab" aria-controls="pills-home" aria-selected="true">Add Flight</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="pills-profile-tab" data-bs-toggle="pill" data-bs-target="#pills-profile" type="button" role="tab" aria-controls="pills-profile" aria-selected="false">Add Airplane</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="pills-contact-tab" data-bs-toggle="pill" data-bs-target="#pills-contact" type="button" role="tab" aria-controls="pills-contact" aria-selected="false">Add Airport</button>
+    </li>
+  </ul>
+  <hr>
+  <div class="tab-content" id="pills-tabContent">
+    <!-- add flight form -->
+    <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">
+        <form action="/addFlight" method="POST" class="row g-3">
+            <div class="col-md-6">
+              <label for="airlineName4" class="form-label">Airline Name</label>
+              <input name="airlineName" type="text" class="form-control" id="airlineName4" required>
+            </div>
+            <div class="col-md-6">
+              <label for="flightNum4" class="form-label">Flight Number</label>
+              <input name="flightNum" type="datetime" class="form-control" id="flightNum4" required>
+            </div>
+            <div class="col-6">
+              <label for="dAirport" class="form-label">Depature Airport</label>
+              <input name="departureAirport" type="text" class="form-control" id="dAirport" required>
+            </div>
+            <div class="col-6">
+              <label for="dTime" class="form-label">Departure Time</label>
+              <input name="departureTime" type="datetime" class="form-control" id="dTime" required>
+            </div>
+            <div class="col-6">
+              <label for="aAirport" class="form-label">Arrival Airport</label>
+              <input name="arrivalAirport" type="text" class="form-control" id="aAirport" required>
+            </div>
+            <div class="col-6">
+              <label for="aTime" class="form-label">Arrival Time</label>
+              <input name="arrivalTime" type="text" class="form-control" id="aTime" required>
+            </div>
+            
+            <div class="col-6">
+              <label for="ticketPrice" class="form-label">Price</label>
+              <div class="input-group m-2">
+                <div class="input-group-prepend">
+                  <div class="input-group-text">$</div>
+                </div>
+                <input name="price" type="number" class="form-control" id="ticketPrice">
+              </div>
+           </div>  
+            <div class="col-3">
+              <label for="flightStatus2" class="form-label">Flight Status</label>
+              <input name="flightStatus" type="text" class="form-control" id="flightStatus2" required>
+            </div>
+            <div class="col-3">
+                <label for="airplaneID2" class="form-label">Airplane ID</label>
+                <input name="airplaneID" type="number" class="form-control" id="airplaneID2" required>
+              </div>
+          
+            <div class="col-12">
+              <button type="submit" class="btn btn-primary">Finalize</button>
+            </div>
+          </form>
+    </div>
+    <!-- add airplane form-->
+    <div class="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab">
+      <form action="/addAirplane" method="POST" class="row g-3">
+        <div class="col-md-4">
+          <label for="airlineName4" class="form-label">Airline Name</label>
+          <input name="airlineName" type="text" class="form-control" id="airlineName4" required>
+        </div>
+        <div class="col-md-4">
+          <label for="airplaneID4" class="form-label">Airplane ID</label>
+          <input name="airplaneID" type="number" class="form-control" id="airplaneID4" required>
+        </div>
+        
+        <div class="col-md-4">
+          <label for="numSeats" class="form-label">Number of Seats</label>
+          <input name="seats" type="number" class="form-control" id="numSeats" required>
+        </div>
+
+        <div class="col-12">
+          <button type="submit" class="btn btn-primary">Finalize</button>
+        </div>
+      </form>
+    </div>
+    <!-- add airport form-->
+    <div class="tab-pane fade" id="pills-contact" role="tabpanel" aria-labelledby="pills-contact-tab">
+      <form action="/addAirport" method="POST" class="row g-3">
+        <div class="col-md-6">
+          <label for="airportName4" class="form-label">Airport Name</label>
+          <input name="airportName" type="text" class="form-control" id="airportName4" required>
+        </div>
+        <div class="col-md-6">
+          <label for="airportCity4" class="form-label">Airport City</label>
+          <input name="airportCity" type="text" class="form-control" id="airportCity4" required>
+        </div>
+
+        <div class="col-12">
+          <button type="submit" class="btn btn-primary">Finalize</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

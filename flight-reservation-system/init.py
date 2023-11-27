@@ -6,7 +6,7 @@ app = Flask(__name__)
 #Establish connection to MySQL server
 conn = pymysql.connect(host='localhost',
                        user='root',
-                       password='password',
+                       password='',
                        db='flight_reservation_system',
                        charset='utf8mb4',
                        cursorclass=pymysql.cursors.DictCursor)
@@ -329,6 +329,100 @@ def registerAirlineStaff():
         flash(message)
         return error#redirect(url_for('register'))
 
+@app.route('/addFlight', methods=['GET', 'POST'])
+def addFlight():
+    airlineName = request.form['airlineName']
+    flightNum = request.form['flightNum']
+    departureAirport = request.form['departureAirport']
+    departureTime = request.form['departureTime']
+    arrivalAirport = request.form['arrivalAirport']
+    arrivalTime = request.form['arrivalTime']
+    price = request.form['price']
+    flightStatus = request.form['flightStatus']
+    airplaneID = request.form['airplaneID']
+
+    cursor = conn.cursor()
+    query = '''
+    INSERT INTO flight(`airline_name`, `flight_num`, `departure_airport`, `departure_time`, `arrival_airport`, `arrival_time`, `price`, `status`, `airplane_id`)
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+    '''
+    values = (airlineName, flightNum, departureAirport, departureTime, arrivalAirport, arrivalTime, price, flightStatus, airplaneID)
+    
+    try:
+        # Execute the query
+        cursor.execute(query, values)
+        conn.commit()
+        cursor.close()
+        # Redirect or return a success message
+        message = "success"
+        flash(message)
+        return redirect(url_for('adminDashboard'))
+    except Exception as e:
+        # Rollback changes if insertion produces an error
+        conn.rollback()
+        error = f"Error: {e}"
+        message = "error-invalid-info"
+        flash(message)
+        return redirect(url_for('adminDashboard'))
+
+@app.route('/addAirplane', methods=['GET', 'POST'])
+def addAirplane():
+    airlineName = request.form['airlineName']
+    airplaneID = request.form['airplaneID']
+    seats = request.form['seats']
+    
+    cursor = conn.cursor()
+    query = '''
+    INSERT INTO airplane(`airline_name`, `airplane_id`, `seats`)
+    VALUES (%s, %s, %s)
+    '''
+    values = (airlineName, airplaneID, seats)
+    
+    try:
+        # Execute the query
+        cursor.execute(query, values)
+        conn.commit()
+        cursor.close()
+        # Redirect or return a success message
+        message = "success"
+        flash(message)
+        return redirect(url_for('adminDashboard'))
+    except Exception as e:
+        # Rollback changes if insertion produces an error
+        conn.rollback()
+        error = f"Error: {e}"
+        message = "error-invalid-info"
+        flash(message)
+        return redirect(url_for('adminDashboard'))
+    
+@app.route('/addAirport', methods=['GET', 'POST'])
+def addAirport():
+    airportName = request.form['airportName']
+    airportCity = request.form['airportCity']
+    
+    cursor = conn.cursor()
+    query = '''
+    INSERT INTO airport(`airport_name`, `airport_city` )
+    VALUES (%s, %s)
+    '''
+    values = (airportName, airportCity)
+    
+    try:
+        # Execute the query
+        cursor.execute(query, values)
+        conn.commit()
+        cursor.close()
+        # Redirect or return a success message
+        message = "success"
+        flash(message)
+        return redirect(url_for('adminDashboard'))
+    except Exception as e:
+        # Rollback changes if insertion produces an error
+        conn.rollback()
+        error = f"Error: {e}"
+        message = "error-invalid-info"
+        flash(message)
+        return redirect(url_for('adminDashboard'))
 
 #Define route to display all upcoming flights in the database
 @app.route('/displayUpcoming')
@@ -385,7 +479,7 @@ def myAccount():
 @app.route('/admin/dashboard')
 def adminDashboard():
     if (is_logged_in() and session['permission'] == 'admin'):
-        return "Access Granted"
+        return render_template('admin.html')
     else:
         return "Access Denied"
 
