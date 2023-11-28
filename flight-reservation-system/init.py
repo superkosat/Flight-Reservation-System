@@ -367,20 +367,33 @@ def addFlight():
 
 @app.route('/addAirplane', methods=['GET', 'POST'])
 def addAirplane():
-    airlineName = request.form['airlineName']
     airplaneID = request.form['airplaneID']
     seats = request.form['seats']
     
     cursor = conn.cursor()
-    query = '''
+    
+    query1 = '''
+    SELECT airline_name FROM airline_staff
+    WHERE airline_staff.username = %s
+    '''
+    value1 = (session['username'])
+
+    cursor.execute(query1, value1)
+    data = cursor.fetchall()
+    print(data)
+
+    airlineName = data[0]['airline_name']
+
+    query2 = '''
     INSERT INTO airplane(`airline_name`, `airplane_id`, `seats`)
     VALUES (%s, %s, %s)
     '''
-    values = (airlineName, airplaneID, seats)
+
+    value2 = (airlineName, airplaneID, seats)
     
     try:
         # Execute the query
-        cursor.execute(query, values)
+        cursor.execute(query2, value2)
         conn.commit()
         cursor.close()
         # Redirect or return a success message
@@ -479,7 +492,23 @@ def myAccount():
 @app.route('/admin/dashboard')
 def adminDashboard():
     if (is_logged_in() and session['permission'] == 'admin'):
-        return render_template('admin.html')
+        cursor = conn.cursor()
+        query = '''
+        SELECT * FROM airplane
+        NATURAL JOIN airline_staff
+        WHERE airline_staff.username = %s
+        '''
+        value = (session['username'])
+
+        cursor.execute(query, value)
+        data = cursor.fetchall()
+        cursor.close()
+        error=None
+        if (data):
+            return render_template('admin.html', data=data)
+        else:
+            error = 'No airplanes found'
+            return render_template('admin.html', error=error) 
     else:
         return "Access Denied"
 

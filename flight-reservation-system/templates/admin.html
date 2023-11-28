@@ -88,16 +88,12 @@
     <!-- add airplane form-->
     <div class="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab">
       <form action="/addAirplane" method="POST" class="row g-3">
-        <div class="col-md-4">
-          <label for="airlineName4" class="form-label">Airline Name</label>
-          <input name="airlineName" type="text" class="form-control" id="airlineName4" required>
-        </div>
-        <div class="col-md-4">
+        <div class="col-md-6">
           <label for="airplaneID4" class="form-label">Airplane ID</label>
           <input name="airplaneID" type="number" class="form-control" id="airplaneID4" required>
         </div>
         
-        <div class="col-md-4">
+        <div class="col-md-6">
           <label for="numSeats" class="form-label">Number of Seats</label>
           <input name="seats" type="number" class="form-control" id="numSeats" required>
         </div>
@@ -106,7 +102,25 @@
           <button type="submit" class="btn btn-primary">Finalize</button>
         </div>
       </form>
+      <div class="container col-md-16", style = margin-top:15px>
+        {% if error %}
+            <p class="text-danger">{{error}}</p>
+        {% else %}
+          <h1>All Airplanes for {{data[0].airline_name}}</h1>
+          <table>
+          <th>Number of Seats</th>
+          <th>Airplane ID</th>
+          {% for flight in data %}
+          <tr>
+              <td>{{flight.seats}}</td>
+              <td>{{flight.airplane_id}}</td>
+          </tr>
+          {% endfor %}
+        {% endif %}
+    </table>
     </div>
+    </div>
+    
     <!-- add airport form-->
     <div class="tab-pane fade" id="pills-contact" role="tabpanel" aria-labelledby="pills-contact-tab">
       <form action="/addAirport" method="POST" class="row g-3">
