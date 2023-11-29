@@ -597,7 +597,22 @@ def adminDashboard():
 #TODO implement route to display top destinations
 @app.route('/displayDestinations')
 def displayDestinations():
-    return render_template('destinations_display.html')
+    cursor = conn.cursor()
+    queryCities = '''
+        SELECT airport_city, COUNT(*) AS ticket_count
+        FROM (
+            SELECT airport.airport_city
+            FROM ticket
+            INNER JOIN flight ON ticket.flight_num = flight.flight_num
+            INNER JOIN airport ON flight.arrival_airport = airport.airport_name
+        ) AS subquery
+        GROUP BY airport_city
+        ORDER BY ticket_count DESC
+        LIMIT 3;
+    '''
+    cursor.execute(queryCities)
+    data = cursor.fetchall()
+    return render_template('destinations_display.html', data=data)
 
 
 ### error handling ###
