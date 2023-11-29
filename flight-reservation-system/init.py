@@ -1,4 +1,4 @@
-from flask import Flask, render_template, session, request, url_for, redirect, flash
+from flask import Flask, render_template, session, request, url_for, redirect, flash, abort, make_response
 import pymysql.cursors
 from datetime import date
 
@@ -592,9 +592,9 @@ def adminDashboard():
             error = 'No airplanes found'
             return render_template('admin.html', error=error) 
     else:
-        return "Access Denied"
+        return make_response(render_template('403.html'), 403)
 
-#TODO implement orute to display top destinations
+#TODO implement route to display top destinations
 @app.route('/displayDestinations')
 def displayDestinations():
     return render_template('destinations_display.html')
@@ -605,12 +605,16 @@ def displayDestinations():
 def not_found(e):
     return render_template('404.html')
 
-@app.errorhandler(403)  
-def not_found(e):
+@app.errorhandler(403)
+def forbidden(e):
     return render_template('403.html')
 
+@app.errorhandler(401)
+def invalid_credentials(e):
+    return render_template('401.html')
+
 @app.errorhandler(400)  
-def not_found(e):
+def bad_request(e):
     return render_template('400.html')
 
 
