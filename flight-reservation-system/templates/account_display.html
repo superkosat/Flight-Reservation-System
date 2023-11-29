@@ -29,6 +29,7 @@
             <a class="list-group-item list-group-item-action active" id="list-profile-list" data-bs-toggle="list" href="#list-profile" role="tab" aria-controls="list-profile"><i class="bi-person-fill" style="font-size: 1.1rem;"></i>  Profile</a>
             {% if session['user_type'] == 'customer' %}
               <a class="list-group-item list-group-item-action" id="list-messages-list" data-bs-toggle="list" href="#list-messages" role="tab" aria-controls="list-messages"><i class="bi-bar-chart-fill" style="font-size: 1rem;"></i>  My Spending</a>
+              <!--Already Implemented in different route -->
               <a class="list-group-item list-group-item-action" id="list-settings-list" data-bs-toggle="list" href="#list-settings" role="tab" aria-controls="list-settings"><i class="bi-airplane-fill" style="font-size: 1rem;"></i>  My Flights</a>
             {% elif session['user_type'] == 'booking_agent' %}
               <a class="list-group-item list-group-item-action" id="list-messages-list" data-bs-toggle="list" href="#list-messages" role="tab" aria-controls="list-messages"><i class="bi-cash-coin" style="font-size: 1rem;"></i>  My Commissions</a>
