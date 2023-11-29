@@ -1,5 +1,6 @@
 from flask import Flask, render_template, session, request, url_for, redirect, flash
 import pymysql.cursors
+from datetime import date
 
 app = Flask(__name__)
 
@@ -382,6 +383,7 @@ def addAirplane():
     data = cursor.fetchall()
     print(data)
 
+    #probably change to fetchone
     airlineName = data[0]['airline_name']
 
     query2 = '''
@@ -487,6 +489,63 @@ def myAccount():
         return render_template('account_display.html')
     else:
         return redirect(url_for('login'))
+
+@app.route('/purchase/<int:flightNum>', methods=['GET', 'POST'])
+def purchase(flightNum):
+    if (is_logged_in()):
+        cursor = conn.cursor()
+        query = '''
+        SELECT airline_name
+        FROM flight  
+        WHERE flight_num = %s
+        '''
+        cursor.execute(query, flightNum)
+        
+        data = cursor.fetchone()
+        airlineName = data['airline_name']
+
+        query = "SELECT MAX(ticket_id) FROM ticket"
+        try:
+            cursor.execute(query)
+            result = cursor.fetchone()
+            ticketID = result['MAX(ticket_id)'] + 1
+            
+            query = '''
+            INSERT INTO ticket(`ticket_id`, `airline_name`, `flight_num`)
+            VALUES(%s, %s, %s)
+            '''
+
+            values = (ticketID, airlineName, flightNum)
+            cursor.execute(query, values)
+
+            query= '''
+            INSERT INTO purchases(`ticket_id`, `customer_email`, `booking_agent_id`, `purchase_date`)
+            VALUES(%s, %s, NULL, %s)
+            '''
+
+            email = (session['username'])
+            today = date.today()
+
+            values = (ticketID, email, today)
+            cursor.execute(query, values)
+
+            conn.commit()
+            cursor.close()
+            # Redirect or return a success message
+            message = "purchase-success"
+            flash(message)
+            cursor.close()
+            return redirect(url_for('home'))
+        except Exception as e:
+            conn.rollback()
+            error = f"Error: {e}"
+            message = "purchase-error"
+            flash(message)
+            return error
+    else:
+        message = "error-not-registered"
+        flash(message)
+        return redirect(url_for('register'))
     
 #TODO route to render admin dashboard for authenticated staff with admin permissions
 @app.route('/admin/dashboard')

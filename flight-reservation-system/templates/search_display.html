@@ -94,12 +94,13 @@
                     <h5>${{flight.price}}</h5>
                 </div>
                 {% if flight.status != "In flight" %}
-                <div class="container">
-                    <button class="btn btn-lg btn-primary" href="">Select Flight</button>
+                <div class="container"> 
+                    <a class="btn btn-lg btn-primary" href="/purchase/{{flight.flight_num}}" role="button" >Select Flight {{flight.flight_num}}</a>
+                    <!-- <button class="btn btn-lg btn-primary" href="/purchase" >Select Flight {{flight.flight_num}}</button> -->
                 </div>
                 {% else %}
                 <div class="container">
-                    <button class="btn btn-lg btn-primary" href="" disabled>Select Flight</button>
+                    <a class="btn btn-lg btn-primary" href="/purchase/{{flight.flight_num}}" role="button" disabled>Select Flight</a>
                 </div>
                 {% endif %}
             </div>

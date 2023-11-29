@@ -16,6 +16,10 @@
             <div class="alert alert-danger" role="alert">
               Error Registering User: username already in use
             </div>
+          {% elif message == "error-not-registered" %}
+            <div class="alert alert-danger" role="alert">
+              Register an account to purchase a flight!
+            </div>
           {% elif message == "success" %}
             <div class="alert alert-success" role="alert">
               Account creation successful! Please <a href="/login">Log in</a> with your credentials.
