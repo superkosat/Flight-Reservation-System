@@ -518,16 +518,39 @@ def purchase(flightNum):
             values = (ticketID, airlineName, flightNum)
             cursor.execute(query, values)
 
-            query= '''
+            query_cust= '''
             INSERT INTO purchases(`ticket_id`, `customer_email`, `booking_agent_id`, `purchase_date`)
             VALUES(%s, %s, NULL, %s)
             '''
 
-            email = (session['username'])
+            query_agent = '''
+            INSERT INTO purchases(`ticket_id`, `customer_email`, `booking_agent_id`, `purchase_date`)
+            VALUES(%s, %s, %s, %s)
+            '''
+
             today = date.today()
 
-            values = (ticketID, email, today)
-            cursor.execute(query, values)
+            email = ""
+            if(session['user_type'] == 'booking_agent'):
+                email = request.form['customerEmail']
+                id_query = '''
+                SELECT booking_agent_id
+                FROM booking_agent
+                WHERE email = %s
+                '''
+                values = (session['username'])
+                cursor.execute(id_query, values)
+                result = cursor.fetchone()
+                agentID = result['booking_agent_id']
+                values = (ticketID, email, agentID, today)
+
+                cursor.execute(query_agent, values)
+
+            else:
+                email = (session['username'])
+                values = (ticketID, email, today)
+
+                cursor.execute(query_cust, values)
 
             conn.commit()
             cursor.close()

@@ -95,8 +95,39 @@
                 </div>
                 {% if flight.status != "In flight" %}
                 <div class="container"> 
-                    <a class="btn btn-lg btn-primary" href="/purchase/{{flight.flight_num}}" role="button" >Select Flight {{flight.flight_num}}</a>
-                    <!-- <button class="btn btn-lg btn-primary" href="/purchase" >Select Flight {{flight.flight_num}}</button> -->
+                    {% if session['user_type'] == 'booking_agent'%}
+                    <!-- Button trigger modal -->
+                    <button type="button" class="btn btn-lg btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                        Select Flight {{flight.flight_num}}
+                    </button>
+  
+                    <!-- Modal -->
+                    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="exampleModalLabel">Purchase for customer:</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <form action="/purchase/{{flight.flight_num}}" method="POST">
+                                        <div class="input-group m-2">
+                                            <div class="input-group-prepend">
+                                            <div class="input-group-text">Customer Email:</div>
+                                            </div>
+                                            <input name="customerEmail" type="email" class="form-control" id="custEmail">
+                                        </div>
+                                        <div>
+                                            <button type="submit" class="btn btn-primary">Purchase</button>
+                                        </div>
+                                    </form> 
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                        <a class="btn btn-lg btn-primary" href="/purchase/{{flight.flight_num}}" role="button" >Select Flight {{flight.flight_num}}</a>
+                    {% endif %}
                 </div>
                 {% else %}
                 <div class="container">
