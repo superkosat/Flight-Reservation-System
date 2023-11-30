@@ -1,6 +1,7 @@
 from flask import Flask, render_template, session, request, url_for, redirect, flash, abort, make_response
 import pymysql.cursors
 from datetime import date
+import json
 
 app = Flask(__name__)
 
@@ -482,11 +483,101 @@ def myFlights():
     
     else:
         return redirect(url_for('home'))
-    
-@app.route('/myAccount')
+
+#couple of minor changes necessary:
+#after filtering dates default to spending tab
+#should show past 6 months by default not whole year: use date.today
+#also there's no way to set a purchase date manually outside to be able to see purchases across months
+#(just sets to current date right now)
+@app.route('/myAccount',  methods=['GET', 'POST'])
 def myAccount():
     if (is_logged_in()):
-        return render_template('account_display.html')
+        startDate = request.form['startDate']
+        endDate = request.form['endDate']
+
+        conditions = ["purchases.customer_email = %s"]
+
+        value = [session['username']]
+
+        if(startDate):
+            conditions.append(" purchases.purchase_date BETWEEN %s and %s")
+            value.append(startDate)
+            value.append(endDate)
+        query = '''
+        SELECT price, purchase_date FROM flight
+        NATURAL JOIN purchases
+        NATURAL JOIN ticket
+        WHERE {}
+        '''.format(" AND ".join(conditions))
+    
+        cursor = conn.cursor()
+        cursor.execute(query, value)
+        data = cursor.fetchall()
+        cursor.close()
+
+        monthly_sums = []
+        months = []
+        monthDict = {
+            '1': "Jan",
+            '2': "Feb",
+            '3': "Mar",
+            '4': "Apr",
+            '5': "May",
+            '6': "Jun",
+            '7': "Jul",
+            '8': "Aug",
+            '9': "Sept",
+            '10': "Oct",
+            '11': "Nov",
+            '12': "Dec"
+        }
+
+        sumAssign = {
+            "01": 0,
+            "02": 1,
+            "03": 2,
+            "04": 3,
+            "05": 4,
+            "06": 5,
+            "07": 6,
+            "08": 7,
+            "09": 8,
+            "10": 9,
+            "11": 10,
+            "12": 11
+        }
+
+        if(startDate):
+            start = int((str(startDate))[5:7])
+            end = int((str(endDate))[5:7])
+            for i in range(start, end + 1):
+                months.append(monthDict[str(i)])
+                monthly_sums.append(0)
+            for purchase in data:
+                pdate = purchase['purchase_date']
+                sdate = int(str(pdate)[5:7]) - start
+                monthly_sums[sdate] += purchase['price']
+        else:
+            monthly_sums = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+            months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sept","Oct","Nov","Dec"]
+            for purchase in data:
+                pdate = purchase['purchase_date']
+                pdate = str(pdate)[5:7]
+                monthly_sums[sumAssign[pdate]] += purchase['price']
+
+        total = 0
+        for i in range(0, len(monthly_sums)):
+            total += monthly_sums[i]
+            monthly_sums[i] = str(monthly_sums[i])
+        total = str(total)
+
+        data = {
+        'months': months,
+        'sums': monthly_sums,
+        'total': total
+        }
+
+        return render_template('account_display.html', data = data)
     else:
         return redirect(url_for('login'))
 
