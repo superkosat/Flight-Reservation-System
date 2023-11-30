@@ -45,6 +45,10 @@
                   <a class="btn btn-outline-dark" href="/admin/dashboard" role="button" style="margin-right: 10px">
                       <i class="bi-shield-lock"></i> Admin Dashboard
                   </a>
+                {% elif session['permission'] == 'operator' %}
+                  <a class="btn btn-outline-dark" href="/operator/dashboard" role="button" style="margin-right: 10px">
+                      <i class="bi-shield-plus"></i> Operator Dashboard
+                  </a>
                 {% endif %}
                 {% if session['username'] %}
                   <a class="btn btn-outline-primary" href="/myAccount" role="button" style="margin-right: 10px">

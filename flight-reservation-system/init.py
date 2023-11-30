@@ -483,6 +483,78 @@ def myFlights():
     
     else:
         return redirect(url_for('home'))
+    
+@app.route('/myAccount')
+def myAccount():
+    if (is_logged_in()):
+        if(session['user_type'] == 'customer'):
+            return redirect(url_for('customerAccount'))
+        elif(session['user_type'] == 'booking_agent'):
+            return redirect(url_for(''))
+        elif(session['user_type'] == 'airline_staff'):
+            return redirect(url_for('staffAccount'))
+        else:
+            return redirect(url_for('home'))
+    else:
+        return redirect(url_for('login'))
+    
+
+@app.route('/staff/account')
+def staffAccount():
+    if (is_logged_in() and session['user_type'] == 'airline_staff'):
+        active_tab = 'list-profile'
+        value = session['username']
+        cursor = conn.cursor()
+
+        #get staff info
+        query = "SELECT * FROM airline_staff WHERE username = %s"
+        cursor.execute(query, value)
+        data = cursor.fetchone()
+
+        #get flights
+        query = "SELECT * FROM flight WHERE airline_name = (SELECT airline_name FROM airline_staff WHERE username = %s)"
+        cursor.execute(query, value)
+        flights = cursor.fetchall()
+
+        #get agents
+        query = '''
+                SELECT * FROM booking_agent 
+                WHERE email IN (
+                    SELECT bawf.email 
+                    FROM booking_agent_work_for AS bawf
+                    JOIN airline_staff AS als ON bawf.airline_name = als.airline_name
+                    WHERE als.username = %s
+                )   
+        '''
+        cursor.execute(query, value)
+        agents = cursor.fetchall()
+
+        cursor.close()
+        return render_template('staff_account_display.html', agents=agents, flights=flights, data=data, active_tab=active_tab)
+    else:
+        return make_response(render_template('403.html'), 403)
+    
+@app.route('/staff/view/flights')
+def staffViewFlights():
+    if (is_logged_in() and session['user_type'] == 'airline_staff'):
+        active_tab = 'list-flights'
+        cursor = conn.cursor()
+        value = session['username']
+        query = "SELECT * FROM flight WHERE airline_name = (SELECT airline_name FROM airline_staff WHERE username = %s)"
+        cursor.execute(query, value)
+        flights = cursor.fetchall()
+        return render_template('staff_account_display.html', flights=flights, active_tab=active_tab)
+    else:
+        return make_response(render_template('403.html'), 403)
+
+
+#TODO route to render operator dashboard for authenticated staff with operator permissions
+@app.route('/operator/dashboard')
+def operatorDashboard():
+    if (is_logged_in() and session['permission'] == 'operator'):
+        return render_template('operator.html')
+    else:
+        return make_response(render_template('403.html'), 403)
 
 #couple of minor changes necessary:
 #after filtering dates default to spending tab
@@ -494,10 +566,10 @@ def filterDate():
     startDate = request.form['startDate']
     endDate = request.form['endDate']
     params = [startDate, endDate]
-    return myAccount(params)
+    return customerAccount(params)
     
-@app.route('/myAccount')
-def myAccount(params = ['a','b']):
+@app.route('/customerAccount')
+def customerAccount(params = ['a','b']):
     if (is_logged_in() and session['user_type'] == 'customer'):
         startDate = params[0]
         endDate = params[1]
