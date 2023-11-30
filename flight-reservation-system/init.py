@@ -489,24 +489,23 @@ def myFlights():
 #should show past 6 months by default not whole year: use date.today
 #also there's no way to set a purchase date manually outside to be able to see purchases across months
 #(just sets to current date right now)
-@app.route('/myAccount')
-def myAccount():
-    if (is_logged_in()):
-        return render_template('account_display.html')
-    else:
-        return redirect(url_for('login'))
+@app.route('/filterDate',  methods=['GET', 'POST'])
+def filterDate():
+    startDate = request.form['startDate']
+    endDate = request.form['endDate']
+    params = [startDate, endDate]
+    return myAccount(params)
     
-@app.route('/trackSpending', methods=['GET', 'POST'])
-def trackSpending():
+@app.route('/myAccount')
+def myAccount(params = ['a','b']):
     if (is_logged_in() and session['user_type'] == 'customer'):
-        startDate = request.form['startDate']
-        endDate = request.form['endDate']
-
+        startDate = params[0]
+        endDate = params[1]
         conditions = ["purchases.customer_email = %s"]
 
         value = [session['username']]
 
-        if(startDate):
+        if(startDate != 'a'):
             conditions.append(" purchases.purchase_date BETWEEN %s and %s")
             value.append(startDate)
             value.append(endDate)
@@ -554,7 +553,7 @@ def trackSpending():
             "12": 11
         }
 
-        if(startDate):
+        if(startDate != 'a'):
             start = int((str(startDate))[5:7])
             end = int((str(endDate))[5:7])
             for i in range(start, end + 1):
@@ -584,7 +583,7 @@ def trackSpending():
             'total': total
         }
 
-        return render_template('test.html', data=data)
+        return render_template('account_display.html', data=data)
     else:
         return redirect(url_for('login'))
 
