@@ -489,9 +489,16 @@ def myFlights():
 #should show past 6 months by default not whole year: use date.today
 #also there's no way to set a purchase date manually outside to be able to see purchases across months
 #(just sets to current date right now)
-@app.route('/myAccount',  methods=['GET', 'POST'])
+@app.route('/myAccount')
 def myAccount():
     if (is_logged_in()):
+        return render_template('account_display.html')
+    else:
+        return redirect(url_for('login'))
+    
+@app.route('/trackSpending', methods=['GET', 'POST'])
+def trackSpending():
+    if (is_logged_in() and session['user_type'] == 'customer'):
         startDate = request.form['startDate']
         endDate = request.form['endDate']
 
@@ -572,12 +579,12 @@ def myAccount():
         total = str(total)
 
         data = {
-        'months': months,
-        'sums': monthly_sums,
-        'total': total
+            'months': months,
+            'sums': monthly_sums,
+            'total': total
         }
 
-        return render_template('account_display.html', data = data)
+        return render_template('test.html', data=data)
     else:
         return redirect(url_for('login'))
 
