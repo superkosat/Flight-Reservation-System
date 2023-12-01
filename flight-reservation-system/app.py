@@ -133,7 +133,7 @@ def loginAuth():
         session['user_type'] = data['user_type']
         session['name'] = data['name']
         if session['user_type'] == 'airline_staff':
-            query = "SELECT permission_type FROM permission INNER JOIN airline_staff ON airline_staff.username = permission.username WHERE airline_staff.username = %s"
+            query = "SELECT permission_type FROM permission NATURAL JOIN airline_staff WHERE username = %s"
             cursor.execute(query, (username))
             data = cursor.fetchone()
             session['permission'] = data['permission_type']
@@ -458,7 +458,7 @@ def displayUpcoming():
         return render_template('index.html', error=error)
 
 #define route to display purchased flights
-#MUST BE LOGGED IN AS CUSTOMER OR BOOKING AGENT
+#MUST BE LOGGED IN AS CUSTOMER
 @app.route('/myFlights')
 def myFlights():
     if (is_logged_in() and session['user_type'] == 'customer'):
@@ -480,7 +480,6 @@ def myFlights():
         else:
             error = 'No flights found'
             return render_template('view_customer_flights.html', error=error)
-    
     else:
         return redirect(url_for('home'))
     
@@ -517,7 +516,7 @@ def staffAccount():
         flights = cursor.fetchall()
 
         #get agents
-        query = '''
+        '''
                 SELECT * FROM booking_agent 
                 WHERE email IN (
                     SELECT bawf.email 
@@ -526,11 +525,53 @@ def staffAccount():
                     WHERE als.username = %s
                 )   
         '''
+
+        query='''
+        SELECT 
+        ba.booking_agent_id,
+        ba.email,
+        SUM(f.price * 0.1) AS past_year_commissions,
+        SUM(CASE WHEN p.purchase_date BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() THEN f.price * 0.1 ELSE 0 END) AS past_month_commissions,
+        COUNT(*) AS total_sales,
+        SUM(CASE WHEN p.purchase_date BETWEEN CURDATE() - INTERVAL 365 DAY AND CURDATE() THEN 1 ELSE 0 END) AS sales_past_year,
+        SUM(CASE WHEN p.purchase_date BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() THEN 1 ELSE 0 END) AS sales_past_month
+        FROM 
+            booking_agent AS ba
+        JOIN 
+            purchases AS p ON ba.booking_agent_id = p.booking_agent_id
+        JOIN 
+            ticket AS t ON p.ticket_id = t.ticket_id
+        JOIN 
+            flight AS f ON t.flight_num = f.flight_num
+        JOIN 
+            booking_agent_work_for AS bawf ON ba.email = bawf.email
+        JOIN 
+            airline_staff AS als ON bawf.airline_name = als.airline_name
+        WHERE 
+            als.username = %s
+        GROUP BY 
+            ba.booking_agent_id, ba.email
+        ORDER BY 
+            past_year_commissions DESC
+        '''
         cursor.execute(query, value)
         agents = cursor.fetchall()
 
+        #get top customers
+        query = '''
+        SELECT c.*, COUNT(p.ticket_id) AS tickets_purchased
+        FROM customer c
+        JOIN purchases p ON c.email = p.customer_email
+        JOIN ticket t ON p.ticket_id = t.ticket_id
+        JOIN airline_staff a ON t.airline_name = a.airline_name
+        WHERE a.username = %s
+        GROUP BY c.email
+        '''
+        cursor.execute(query, value)
+        customers = cursor.fetchall()
+
         cursor.close()
-        return render_template('staff_account_display.html', agents=agents, flights=flights, data=data, active_tab=active_tab)
+        return render_template('staff_account_display.html', customers=customers, agents=agents, flights=flights, data=data, active_tab=active_tab)
     else:
         return make_response(render_template('403.html'), 403)
     
@@ -538,12 +579,7 @@ def staffAccount():
 def staffViewFlights():
     if (is_logged_in() and session['user_type'] == 'airline_staff'):
         active_tab = 'list-flights'
-        cursor = conn.cursor()
-        value = session['username']
-        query = "SELECT * FROM flight WHERE airline_name = (SELECT airline_name FROM airline_staff WHERE username = %s)"
-        cursor.execute(query, value)
-        flights = cursor.fetchall()
-        return render_template('staff_account_display.html', flights=flights, active_tab=active_tab)
+        return redirect(url_for('staffAccount'))
     else:
         return make_response(render_template('403.html'), 403)
 

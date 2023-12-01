@@ -130,9 +130,9 @@
                     {% endif %}
                 </div>
                 {% else %}
-                <div class="container">
-                    <a class="btn btn-lg btn-primary" href="/purchase/{{flight.flight_num}}" role="button" disabled>Select Flight</a>
-                </div>
+                    <div class="container">
+                        <a class="btn btn-lg btn-primary disabled" role="button" disabled>Select Flight {{ flight.flight_num }}</a>
+                    </div>
                 {% endif %}
             </div>
         </div>
