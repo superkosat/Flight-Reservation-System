@@ -1,0 +1,320 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
+
+<div class="container" style="margin-top: 5%;">
+    <div class="row align-items-center">
+      <div class="col-auto">
+        <i class="bi-person" style="font-size: 4rem;"></i>
+      </div>
+      <div class="col">
+        <h3>{% if session['user_type'] == 'booking_agent'%}Booking Agent #{% endif %}{{ session['name'] }}</h3>
+        {% if session['user_type'] == 'customer' %}
+            <p class="text-muted">Customer account</p>
+        {% elif session['user_type'] == 'booking_agent' %}
+            <p class="text-muted">Agent account</p>
+        {% elif session['user_type'] == 'airline_staff' and session['permission'] == 'admin'%}
+            <p class="text-muted">Staff account <span class="badge rounded-pill bg-success">Admin</span></p>
+         
+        {% elif session['user_type'] == 'airline_staff' %}
+            <p class="text-muted">Staff account</p>
+        {% endif %}
+        
+      </div>
+    </div>
+</div>
+
+
+<div class="container" style="margin-top: 20px;">
+    <div class="row">
+        <div class="col-3">
+          <div class="list-group" id="list-tab" role="tablist">
+              <a class="list-group-item list-group-item-action active" id="list-profile-list" data-bs-toggle="list" href="#list-profile" role="tab" aria-controls="list-profile"><i class="bi-person-fill" style="font-size: 1.1rem;"></i>  Profile</a>
+              <a class="list-group-item list-group-item-action" id="list-spending-list" data-bs-toggle="list" href="#list-flights" role="tab" aria-controls="list-flights"><i class="bi-airplane-fill" style="font-size: 1rem;"></i>  Flights</a>
+              <a class="list-group-item list-group-item-action" id="list-commissions-list" data-bs-toggle="list" href="#list-commissions" role="tab" aria-controls="list-commissions"><i class="bi-airplane-fill" style="font-size: 1rem;"></i>  My Commissions</a>
+              <a class="list-group-item list-group-item-action" id="list-topCust-list" data-bs-toggle="list" href="#list-topCust" role="tab" aria-controls="list-topCust"><i class="bi-person-badge-fill" style="font-size: 1rem;"></i>  Top Customers</a>
+<!--               <a class="list-group-item list-group-item-action" id="list-settings-list" data-bs-toggle="list" href="#list-customers" role="tab" aria-controls="list-settings"><i class="bi-person-vcard-fill" style="font-size: 1rem;"></i>  Customers</a>
+              <a class="list-group-item list-group-item-action" id="list-settings-list" data-bs-toggle="list" href="#list-sales-report" role="tab" aria-controls="list-settings"><i class="bi-bar-chart-fill" style="font-size: 1rem;"></i>  Sales Report</a>
+              <a class="list-group-item list-group-item-action" id="list-settings-list" data-bs-toggle="list" href="#list-revenue-report" role="tab" aria-controls="list-settings"><i class="bi-pie-chart-fill" style="font-size: 1rem;"></i>  Revenue Report</a>
+              <a class="list-group-item list-group-item-action" id="list-settings-list" data-bs-toggle="list" href="#list-destinations" role="tab" aria-controls="list-settings"><i class="bi-pin-map-fill" style="font-size: 1rem;"></i>  Destinations</a> --> 
+          </div>
+        </div>
+        <div class="col-9">
+          <div class="tab-content" id="nav-tabContent">
+            <div class="tab-pane fade show active" id="list-profile" role="tabpanel" aria-labelledby="list-profile-list">
+              <div class="container rounded">
+                <!-- need to join booking_agent and work_for to get airline affiliation; null if none-->
+                {% if data %}
+                    {% if data.airline_name != NULL %}
+                        <h4>Airline Affiliation: {{ data.airline_name }}</h4>
+                    {% else %}
+                        <h4>Airline Affiliation: None</h4>
+                    {% endif %}
+                    <h4>Username: {{ data.email }}</h4>
+                    <h4>Agent ID: {{ data.booking_agent_id }}</h4>
+                {% endif %}
+              </div>
+            </div>
+
+
+            <div class="tab-pane fade" id="list-flights" role="tabpanel" aria-labelledby="list-flights-list">
+                <div class="container">
+                    <div class="row">
+                    <div class="col">
+                        <h4>Your Booked Flights: </h4>
+                        <table class="table table-striped">
+                        <thead>
+                            <tr>
+                            <th scope="col">Flight Number</th>
+                            <th scope="col">Departure Airport</th>
+                            <th scope="col">Arrival Airport</th>
+                            <th scope="col">Departure Time</th>
+                            <th scope="col">Arrival Time</th>
+                            <th scope="col">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if flights %}
+                            {% for entry in flights %}
+                                {% if entry.status == "On time" or entry.status == "Delayed" %}
+                                <tr>
+                                    <th scope="row">{{ entry.flight_num }}</th>
+                                    <td>{{ entry.departure_airport }}</td>
+                                    <td>{{ entry.arrival_airport }}</td>
+                                    <td>{{ entry.departure_time }}</td>
+                                    <td>{{ entry.arrival_time }}</td>
+                                    <td>{{ entry.status }}</td>
+                                </tr>
+                                {% endif %}
+                            {% endfor %}
+                            {% endif %}
+                        </tbody>
+                        </table>
+                    </div>
+                    <div class="col">
+                        <h4>Previously Booked Flights</h4>
+                        <table class="table table-striped">
+                        <thead>
+                            <tr>
+                            <th scope="col">Flight Number</th>
+                            <th scope="col">Departure Airport</th>
+                            <th scope="col">Arrival Airport</th>
+                            <th scope="col">Departure Time</th>
+                            <th scope="col">Arrival Time</th>
+                            <th scope="col">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if flights %}
+                            {% for entry in flights %}
+                                {% if entry.status == "In flight" %}
+                                <tr>
+                                    <th scope="row">{{ entry.flight_num }}</th>
+                                    <td>{{ entry.departure_airport }}</td>
+                                    <td>{{ entry.arrival_airport }}</td>
+                                    <td>{{ entry.departure_time }}</td>
+                                    <td>{{ entry.arrival_time }}</td>
+                                    <td>{{ entry.status }}</td>
+                                </tr>
+                                {% endif %}
+                            {% endfor %}
+                            {% endif %}
+                        </tbody>
+                        </table>
+                    </div>
+                  </div>
+                </div>
+            </div>
+
+
+            <div class="tab-pane fade" id="list-commissions" role="tabpanel" aria-labelledby="list-commissions-list">
+                {% if commissions[0].commissions != None %}
+                    <div class="table-responsive">
+                      <table id="agentTable" class="table table-striped">
+                        <thead>
+                          <tr>
+                            <th><i class="bi-funnel-fill" style="font-size: 1rem;"></i> Sales</th>
+                            <th><i class="bi-funnel-fill" style="font-size: 1rem;"></i> Commissions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {% for commission in commissions %}
+                          <tr>
+                            <td>{{ commission.total_sales }}</td>
+                            <td>{{ commission.commissions }}</td>
+                          </tr>
+                          {% endfor %}
+                        </tbody>
+                      </table>
+                    </div>
+                    <!-- Button trigger modal -->
+                    <button type="button" class="btn btn-lg btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                    Filter Dates
+                    </button>
+  
+                    <!-- Modal -->
+                    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLabel">Filter Dates:</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                <form action="/filterComms" method="POST">
+                                    <div class="input-group m-2">
+                                        <div class="input-group-prepend">
+                                        <div class="input-group-text">Start Date:</div>
+                                        </div>
+                                        <input name="startDate" type="date" class="form-control" id="sDate" required>
+                                    </div>
+                                    <div class="input-group m-2">
+                                        <div class="input-group-prepend">
+                                        <div class="input-group-text">End Date:</div>
+                                        </div>
+                                        <input name="endDate" type="date" class="form-control" id="eDate" required>
+                                    </div>
+                                    <div>
+                                        <button type="submit" class="btn btn-primary">Filter</button>
+                                    </div>
+                                </form> 
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <h4>No booking agent sales found.</h4>
+                {% endif %}
+            </div>
+            <div class="tab-pane fade" id="list-topCust" role="tabpanel" aria-labelledby="list-topCust-list">
+              <div class="container">
+                <h3>Top Customers: </h3>
+                <!-- <div class="input-group mb-3">
+                  <input type="text" class="form-control" placeholder="Customer's email" aria-label="Recipient's username" aria-describedby="button-addon2">
+                  <button class="btn btn-outline-secondary" type="button" id="button-addon2">Search</button>
+                </div> -->
+              </div>
+                {% if commissions[0].commissions != None %}
+                    <div class="card chart-container">
+                        <canvas id="chart1"></canvas>
+                    </div>
+                    <div class="card chart-container">
+                        <canvas id="chart2"></canvas>
+                    </div>
+                  <!-- <h4>Top Customers</h4>
+                    <div class="table-responsive">
+                      <table id="agentTable" class="table table-striped">
+                        <thead>
+                          <tr>
+                            <th>Email</th>
+                            <th>Name</th>
+                            <th><i class="bi-funnel-fill" style="font-size: 1rem;"></i> Tickets Purchased</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {% for customer in customers %}
+                          <tr>
+                            <td>{{ customer.email }}</td>
+                            <td>{{ customer.name }}</td>
+                            <td>{{ customer.tickets_purchased }}</td>
+                          </tr>
+                          {% endfor %}
+                        </tbody>
+                      </table>
+                    </div> -->
+                {% else %}
+                    <h4 class="text-muted">No customers found.</h4>
+                {% endif %}
+            </div>
+            <!-- <div class="tab-pane fade" id="list-sales-report" role="tabpanel" aria-labelledby="list-settings-list"></div>
+            <div class="tab-pane fade" id="list-revenue-report" role="tabpanel" aria-labelledby="list-messages-list"></div>
+            <div class="tab-pane fade" id="list-destinations" role="tabpanel" aria-labelledby="list-settings-list"></div> -->
+          </div>
+        </div>
+      </div>  
+  </div>
+
+<script
+src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.js">
+</script>
+
+<script>
+
+  var saleData = JSON.parse('{{saleData | tojson | safe}}');
+  var emails = saleData.emails
+  var sales = saleData.sales
+//   var total = flaskData.total
+  length = emails.length;
+  var salesArray = [];
+
+  for (var i = 0; i < length; i++) 
+    salesArray.push(parseInt(sales[i])); 
+
+  const ctx = document.getElementById("chart1").getContext('2d');
+  const myChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: emails,
+      datasets: [{
+        label: 'By Total Sales In Last Six Months: ',
+        backgroundColor: 'rgba(161, 198, 247, 1)',
+        borderColor: 'rgb(47, 128, 237)',
+        data: salesArray,
+      }]
+    },
+    options: {
+      scales: {
+        yAxes: [{
+          ticks: {
+            beginAtZero: true,
+          }
+        }]
+      }
+    },
+  });
+</script>
+
+<script>
+
+    var commsData = JSON.parse('{{commsData | tojson | safe}}');
+    var emails = commsData.emails
+    var comms = commsData.comms
+    // var total = flaskData.total
+    length = emails.length;
+    var commsArray = [];
+  
+    for (var i = 0; i < length; i++) 
+      commsArray.push(parseInt(comms[i])); 
+  
+    const ctx2 = document.getElementById("chart2").getContext('2d');
+    const myChart2 = new Chart(ctx2, {
+      type: 'bar',
+      data: {
+        labels: emails,
+        datasets: [{
+          label: 'By Total Commissions In Last Year: ',
+          backgroundColor: 'rgba(161, 198, 247, 1)',
+          borderColor: 'rgb(47, 128, 237)',
+          data: commsArray,
+        }]
+      },
+      options: {
+        scales: {
+          yAxes: [{
+            ticks: {
+              beginAtZero: true,
+            }
+          }]
+        }
+      },
+    });
+  </script>
+
+
+{% endblock %}
+
+{% block footer %}
+{% endblock %}

@@ -1,7 +1,6 @@
 from flask import Flask, render_template, session, request, url_for, redirect, flash, abort, make_response
 import pymysql.cursors
 from datetime import date
-import json
 
 app = Flask(__name__)
 
@@ -489,7 +488,7 @@ def myAccount():
         if(session['user_type'] == 'customer'):
             return redirect(url_for('customerAccount'))
         elif(session['user_type'] == 'booking_agent'):
-            return redirect(url_for(''))
+            return redirect(url_for('agentAccount'))
         elif(session['user_type'] == 'airline_staff'):
             return redirect(url_for('staffAccount'))
         else:
@@ -497,7 +496,152 @@ def myAccount():
     else:
         return redirect(url_for('login'))
     
+@app.route('/filterComms',  methods=['GET', 'POST'])
+def filterComms():
+    startDate = request.form['startDate']
+    endDate = request.form['endDate']
+    params = [startDate, endDate]
+    return agentAccount(params)
 
+@app.route('/agent/account')
+def agentAccount(params = ['a','b']):
+    if (is_logged_in() and session['user_type'] == 'booking_agent'):
+        startDate = params[0]
+        endDate = params[1]
+        start = ""
+        end = ""
+        active_tab = 'list-profile'
+        value = session['username']
+        values = []
+        cursor = conn.cursor()
+
+        #get agent info
+        query = '''SELECT * FROM booking_agent
+                    LEFT JOIN booking_agent_work_for
+                    ON booking_agent.email = booking_agent_work_for.email
+                    WHERE booking_agent.email = %s'''
+        cursor.execute(query, value)
+        data = cursor.fetchone()
+
+        #get flights
+        query = '''SELECT * FROM flight
+        NATURAL JOIN purchases
+        NATURAL JOIN ticket
+        NATURAL JOIN booking_agent
+        WHERE booking_agent.email = %s
+        '''
+        
+        cursor.execute(query, value)
+        flights = cursor.fetchall()
+
+        #add date filtering with if statement
+        #get agent's commissions
+        query1 = '''
+        SELECT SUM(CASE WHEN p.purchase_date BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() THEN f.price * 0.1 ELSE 0 END) AS commissions,
+        COUNT(*) AS total_sales
+        FROM 
+            booking_agent AS ba
+        JOIN 
+            purchases AS p ON ba.booking_agent_id = p.booking_agent_id
+        JOIN 
+            ticket AS t ON p.ticket_id = t.ticket_id
+        JOIN 
+            flight AS f ON t.flight_num = f.flight_num
+        WHERE 
+            ba.email = %s
+        '''
+        query2 = '''
+        SELECT SUM(CASE WHEN p.purchase_date BETWEEN %s AND %s THEN f.price * 0.1 ELSE 0 END) AS commissions,
+        COUNT(*) AS total_sales
+        FROM 
+            booking_agent AS ba
+        JOIN 
+            purchases AS p ON ba.booking_agent_id = p.booking_agent_id
+        JOIN 
+            ticket AS t ON p.ticket_id = t.ticket_id
+        JOIN 
+            flight AS f ON t.flight_num = f.flight_num
+        WHERE 
+            ba.email = %s
+        '''
+        if(startDate != 'a'):
+            start = startDate
+            end = endDate
+            values.append(start)
+            values.append(end)
+            values.append(value)
+            cursor.execute(query2, values)
+        else:
+            values.append(value)
+            cursor.execute(query1, values)
+        commissions = cursor.fetchall()
+        if(commissions[0]['commissions'] != None):
+            commissions[0]['commissions'] = int(commissions[0]['commissions'])
+
+        #get top 5 customers by number sales last 6 months: need to make it just 5
+        query = '''
+        SELECT c.*, COUNT(CASE WHEN p.purchase_date BETWEEN CURDATE() - INTERVAL 6 MONTH AND CURDATE() THEN 1 ELSE 0 END) AS tickets_purchased
+        FROM customer c
+        JOIN purchases p ON c.email = p.customer_email
+        JOIN booking_agent AS ba on ba.booking_agent_id = p.booking_agent_id
+        WHERE ba.email = %s
+        GROUP BY c.email
+        '''
+        cursor.execute(query, value)
+        customerSales = cursor.fetchall()
+
+        #cSaleEmails = customerSales['email']
+        #cSaleSales = customerSales['tickets_purchased']
+
+        emails = []
+        sales = []
+        for customer in customerSales:
+            customer["tickets_puchased"] = str(customer["tickets_purchased"])
+            emails.append(customer["email"])
+            sales.append(customer["tickets_purchased"])
+
+        
+        saleData = {
+            'emails': emails,
+            'sales': sales
+        }
+        
+        #get top 5 customers by total commission: need to make it just 5
+        query = '''
+        SELECT c.*, 
+        SUM(CASE WHEN p.purchase_date BETWEEN CURDATE() - INTERVAL 365 DAY AND CURDATE() THEN f.price * 0.1 ELSE 0 END) AS past_year_commissions
+        FROM customer c
+        JOIN purchases p ON c.email = p.customer_email
+        JOIN ticket t ON p.ticket_id = t.ticket_id
+        JOIN flight AS f ON t.flight_num = f.flight_num
+        JOIN booking_agent AS ba on ba.booking_agent_id = p.booking_agent_id
+        WHERE ba.email = %s
+        GROUP BY c.email
+        '''
+
+        cursor.execute(query, value)
+        customerComms = cursor.fetchall()
+
+        #cCommsEmails = customerComms['email']
+        #cCommsComms = customerComms['past_year_commissions']
+
+        emails = []
+        comms = []
+        for customer in customerComms:
+            customer["past_year_commissions"] = str(int(customer["past_year_commissions"]))
+            emails.append(customer["email"])
+            comms.append(customer["past_year_commissions"])
+        
+        commsData = {
+            'emails': emails,
+            'comms': comms,
+        }
+
+        cursor.close()
+        return render_template('agent_account_display.html', saleData=saleData, commsData = commsData, commissions = commissions, flights=flights, data=data, active_tab=active_tab)
+    else:
+        return make_response(render_template('403.html'), 403)
+    
 @app.route('/staff/account')
 def staffAccount():
     if (is_logged_in() and session['user_type'] == 'airline_staff'):
