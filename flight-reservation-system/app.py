@@ -512,7 +512,7 @@ def agentAccount(params = ['a','b']):
         end = ""
         active_tab = 'list-profile'
         value = session['username']
-        values = []
+        values = [value]
         cursor = conn.cursor()
 
         #get agent info
@@ -537,8 +537,8 @@ def agentAccount(params = ['a','b']):
         #add date filtering with if statement
         #get agent's commissions
         query1 = '''
-        SELECT SUM(CASE WHEN p.purchase_date BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() THEN f.price * 0.1 ELSE 0 END) AS commissions,
-        COUNT(*) AS total_sales
+        SELECT SUM(f.price * 0.1) AS commissions,
+        COUNT(*) as total_sales
         FROM 
             booking_agent AS ba
         JOIN 
@@ -549,10 +549,12 @@ def agentAccount(params = ['a','b']):
             flight AS f ON t.flight_num = f.flight_num
         WHERE 
             ba.email = %s
+        AND
+        	p.purchase_date BETWEEN CONVERT( %s , DATETIME) AND CONVERT( %s , DATETIME);
         '''
         query2 = '''
-        SELECT SUM(CASE WHEN p.purchase_date BETWEEN %s AND %s THEN f.price * 0.1 ELSE 0 END) AS commissions,
-        COUNT(*) AS total_sales
+        SELECT SUM(CASE WHEN p.purchase_date BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() THEN f.price * 0.1 ELSE 0 END) AS commissions,
+        COUNT(CASE WHEN p.purchase_date BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() THEN 1 ELSE 0 END) AS total_sales
         FROM 
             booking_agent AS ba
         JOIN 
@@ -564,19 +566,35 @@ def agentAccount(params = ['a','b']):
         WHERE 
             ba.email = %s
         '''
+        """ query2 = '''
+        SELECT SUM(CASE WHEN p.purchase_date BETWEEN %s AND %s THEN f.price * 0.1 ELSE 0 END) AS commissions,
+        COUNT(CASE WHEN p.purchase_date BETWEEN %s AND %s  THEN 1 ELSE 0 END) AS total_sales
+        FROM 
+            booking_agent AS ba
+        JOIN 
+            purchases AS p ON ba.booking_agent_id = p.booking_agent_id
+        JOIN 
+            ticket AS t ON p.ticket_id = t.ticket_id
+        JOIN 
+            flight AS f ON t.flight_num = f.flight_num
+        WHERE 
+            ba.email = %s
+        ''' """
+        
         if(startDate != 'a'):
             start = startDate
             end = endDate
             values.append(start)
             values.append(end)
-            values.append(value)
-            cursor.execute(query2, values)
-        else:
-            values.append(value)
             cursor.execute(query1, values)
+        else:
+            cursor.execute(query2, values)
         commissions = cursor.fetchall()
+        print(commissions)
         if(commissions[0]['commissions'] != None):
             commissions[0]['commissions'] = int(commissions[0]['commissions'])
+        elif(commissions[0]['commissions'] == None and params[0] != 'a'):
+            commissions[0]['commissions'] = 0
 
         #get top 5 customers by number sales last 6 months: need to make it just 5
         query = '''
