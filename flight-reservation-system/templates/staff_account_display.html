@@ -125,7 +125,7 @@
             </div>
 
 
-            <div class="tab-pane fade" id="list-agents" role="tabpanel" aria-labelledby="list-settings-list">
+            <div class="tab-pane fade" id="list-agents" role="tabpanel" aria-labelledby="list-agents-list">
                 {% if agents %}
                     <div class="table-responsive">
                       <table id="agentTable" class="table table-striped">
@@ -159,12 +159,16 @@
               <div class="container">
                 <h3>Customer History Lookup</h3>
                 <div class="input-group mb-3">
-                  <input type="text" class="form-control" placeholder="Customer's email" aria-label="Recipient's username" aria-describedby="button-addon2">
-                  <button class="btn btn-outline-secondary" type="button" id="button-addon2">Search</button>
+                  <input type="text" id="searchEmail" class="form-control" placeholder="Customer's email" aria-label="Recipient's username" aria-describedby="button-addon2">
+                  <button id="searchButton" class="btn btn-outline-secondary" type="button" id="button-addon2">Search</button>
+                </div>
+                <div id="searchResults">
+
                 </div>
               </div>
+              <div class="container" id="customerFlightDisplayDiv">
                 {% if customers %}
-                  <h4>Top Customers</h4>
+                <h4>Top Customers</h4>
                     <div class="table-responsive">
                       <table id="agentTable" class="table table-striped">
                         <thead>
@@ -188,10 +192,27 @@
                 {% else %}
                     <h4 class="text-muted">No customers found.</h4>
                 {% endif %}
+              </div>
+                
+                  
             </div>
-            <div class="tab-pane fade" id="list-sales-report" role="tabpanel" aria-labelledby="list-settings-list"></div>
-            <div class="tab-pane fade" id="list-revenue-report" role="tabpanel" aria-labelledby="list-messages-list"></div>
-            <div class="tab-pane fade" id="list-destinations" role="tabpanel" aria-labelledby="list-settings-list"></div>
+
+
+
+            <div class="tab-pane fade" id="list-sales-report" role="tabpanel" aria-labelledby="list-sales-report-list">
+              <div class="container">
+                <div class="input-group">
+                  <span class="input-group-text">Date Range</span>
+                  <input type="date" aria-label="First name" class="form-control">
+                  <input type="date" aria-label="Last name" class="form-control">
+                </div>
+              </div>
+            </div>
+
+
+
+            <div class="tab-pane fade" id="list-revenue-report" role="tabpanel" aria-labelledby="list-revenue-report-list"></div>
+            <div class="tab-pane fade" id="list-destinations" role="tabpanel" aria-labelledby="list-destinations-list"></div>
           </div>
         </div>
       </div>  
@@ -208,10 +229,36 @@
     });
 
     $(document).ready(function () {
-            $('#agentTable').DataTable({
+        $('#agentTable').DataTable({
                 
-            });
         });
+    });
+
+    $(document).ready(function() {
+      $('#searchButton').click(function() {
+        $('#customerFlightDisplayDiv').hide();
+        var searchEmail = $('#searchEmail').val();
+        var matches = [];
+
+        // Filter customerFlights based on the provided email
+        $.each({{ customerFlights | tojson | safe }}, function(index, item) {
+            if (item.email === searchEmail) {
+                matches.push(item);
+            }
+        });
+
+        // Display the matching entries in searchResults div
+        var resultsHtml = '<h4>Search Results For ' + searchEmail +  ':</h4>';
+        $.each(matches, function(index, match) {
+            resultsHtml += '<ul>';
+            resultsHtml += '<li><strong>Flight Number:</strong> ' + match.flight_num + '</li>';
+            resultsHtml += '<li><strong>Departure Time:</strong> ' + match.departure_time + '</li>';
+            // Add more attributes as needed (adjust attribute names according to your data)
+            resultsHtml += '</ul><hr>';
+        });
+        $('#searchResults').html(resultsHtml);
+    });
+});
   </script>
   
 

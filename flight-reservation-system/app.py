@@ -491,8 +491,6 @@ def myAccount():
             return redirect(url_for('agentAccount'))
         elif(session['user_type'] == 'airline_staff'):
             return redirect(url_for('staffAccount'))
-        else:
-            return redirect(url_for('home'))
     else:
         return redirect(url_for('login'))
     
@@ -679,13 +677,13 @@ def staffAccount():
 
         #get agents
         '''
-                SELECT * FROM booking_agent 
-                WHERE email IN (
-                    SELECT bawf.email 
-                    FROM booking_agent_work_for AS bawf
-                    JOIN airline_staff AS als ON bawf.airline_name = als.airline_name
-                    WHERE als.username = %s
-                )   
+        SELECT * FROM booking_agent 
+        WHERE email IN (
+            SELECT bawf.email 
+            FROM booking_agent_work_for AS bawf
+            JOIN airline_staff AS als ON bawf.airline_name = als.airline_name
+            WHERE als.username = %s
+        )   
         '''
 
         query='''
@@ -732,8 +730,20 @@ def staffAccount():
         cursor.execute(query, value)
         customers = cursor.fetchall()
 
+        #get customer flights
+        query = '''
+        SELECT * FROM flight f
+        JOIN ticket t ON f.flight_num = t.flight_num
+        JOIN purchases p ON t.ticket_id = p.ticket_id
+        JOIN customer c ON p.customer_email = c.email
+        WHERE f.airline_name = (SELECT airline_name FROM airline_staff WHERE username = %s)
+        '''
+        cursor.execute(query, value)
+        customerFlights = cursor.fetchall()
+
+
         cursor.close()
-        return render_template('staff_account_display.html', customers=customers, agents=agents, flights=flights, data=data, active_tab=active_tab)
+        return render_template('staff_account_display.html', customerFlights=customerFlights, customers=customers, agents=agents, flights=flights, data=data, active_tab=active_tab)
     else:
         return make_response(render_template('403.html'), 403)
     
