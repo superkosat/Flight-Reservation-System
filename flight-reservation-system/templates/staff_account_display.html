@@ -18,7 +18,8 @@
             <p class="text-muted">Agent account</p>
         {% elif session['user_type'] == 'airline_staff' and session['permission'] == 'admin'%}
             <p class="text-muted">Staff account <span class="badge rounded-pill bg-success">Admin</span></p>
-         
+        {% elif session['user_type'] == 'airline_staff' and session['permission'] == 'operator' %}
+            <p class="text-muted">Staff account <span class="badge rounded-pill bg-info">Operator</span></p>
         {% elif session['user_type'] == 'airline_staff' %}
             <p class="text-muted">Staff account</p>
         {% endif %}

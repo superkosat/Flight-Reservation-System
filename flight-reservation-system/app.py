@@ -900,6 +900,43 @@ def operatorDashboard():
         return render_template('operator.html')
     else:
         return make_response(render_template('403.html'), 403)
+    
+@app.route('/operator/changeFlightStatus', methods=['POST'])
+def changeFlightStatus():
+    if (is_logged_in() and session['permission'] == 'operator'):
+        flightNum = request.form['flightNum']
+        flightStatus = request.form['flightStatus']
+
+        cursor = conn.cursor()
+
+        query = "SELECT * FROM flight WHERE flight_num = %s"
+        cursor.execute(query, flightNum)
+        data = cursor.fetchone()
+        if not data:
+            message = "error-invalid-flight"
+            flash(message)
+            return redirect(url_for('operatorDashboard'))
+        
+        try:
+            query = '''
+            UPDATE flight
+            SET status = %s
+            WHERE flight_num = %s;
+            '''
+            cursor.execute(query, (flightStatus, flightNum))
+            conn.commit()
+            cursor.close()
+            message = "success"
+            flash(message)
+            return redirect(url_for('operatorDashboard'))
+        except Exception as e:
+            conn.rollback()
+            error = f"Error: {e}"
+            message = "error-invalid-flight"
+            flash(message)
+            return redirect(url_for('operatorDashboard'))
+    else:
+        return make_response(render_template('403.html'), 403)
 
 #couple of minor changes necessary:
 #after filtering dates default to spending tab
@@ -1018,6 +1055,20 @@ def purchase(flightNum):
         data = cursor.fetchone()
         airlineName = data['airline_name']
 
+        if (session['user_type'] == 'airline_staff'):
+            return redirect(url_for('staffAccount'))
+        
+        if (session['user_type'] == 'booking_agent'):
+            query = "SELECT airline_name FROM booking_agent_work_for WHERE email = %s"
+            cursor.execute(query, session['username'])
+            agentAirlineNames = cursor.fetchall()
+            print(agentAirlineNames)
+            print(airlineName)
+            agent_airlines = [agent['airline_name'] for agent in agentAirlineNames]
+            if airlineName not in agent_airlines:
+                message = "agent-error"
+                flash(message)
+                return redirect(url_for('home'))
         
 
         query = "SELECT MAX(ticket_id) FROM ticket"
