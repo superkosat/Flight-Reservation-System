@@ -372,7 +372,6 @@ def addAirplane():
 
     cursor.execute(query1, value1)
     data = cursor.fetchall()
-    print(data)
 
     #probably change to fetchone
     airlineName = data[0]['airline_name']
@@ -500,6 +499,8 @@ def agentAccount(params = ['a','b']):
         start = ""
         end = ""
         active_tab = 'list-profile'
+        if(startDate != 'a'):
+            active_tab = 'list-sales-report'
         value = session['username']
         values = [value]
         cursor = conn.cursor()
@@ -589,6 +590,17 @@ def agentAccount(params = ['a','b']):
             customer["tickets_puchased"] = str(customer["tickets_purchased"])
             emails.append(customer["email"])
             sales.append(customer["tickets_purchased"])
+        emailsLimit = []
+        salesLimit = []
+        i = 0
+        while(len(emailsLimit) < 5):
+            emailsLimit.append(emails[i])
+            salesLimit.append(sales[i])
+            i += 1
+            if(len(emailsLimit) == len(emails)):
+                break
+        emails = emailsLimit
+        sales = salesLimit
 
         
         saleData = {
@@ -618,6 +630,17 @@ def agentAccount(params = ['a','b']):
             customer["past_year_commissions"] = str(int(customer["past_year_commissions"]))
             emails.append(customer["email"])
             comms.append(customer["past_year_commissions"])
+        emailsLimit = []
+        commsLimit = []
+        i = 0
+        while(len(emailsLimit) < 5):
+            emailsLimit.append(emails[i])
+            commsLimit.append(comms[i])
+            i += 1
+            if(len(emailsLimit) == len(emails)):
+                break
+        emails = emailsLimit
+        comms = commsLimit
         
         commsData = {
             'emails': emails,
@@ -644,6 +667,8 @@ def staffAccount(params = ['a','b']):
         start = ""
         end = ""
         active_tab = 'list-profile'
+        if(startDate != 'a'):
+            active_tab = 'list-sales-report'
         value = session['username']
         cursor = conn.cursor()
 
@@ -658,15 +683,6 @@ def staffAccount(params = ['a','b']):
         flights = cursor.fetchall()
 
         #get agents
-        '''
-        SELECT * FROM booking_agent 
-        WHERE email IN (
-            SELECT bawf.email 
-            FROM booking_agent_work_for AS bawf
-            JOIN airline_staff AS als ON bawf.airline_name = als.airline_name
-            WHERE als.username = %s
-        )   
-        '''
 
         query='''
         SELECT 
@@ -816,7 +832,6 @@ def staffAccount(params = ['a','b']):
         cursor = conn.cursor()
         cursor.execute(query, values)
         totalSales = cursor.fetchall()
-        #print(totalSales)
         monthlySales = []
         months = []
         monthDict = {
@@ -877,7 +892,6 @@ def staffAccount(params = ['a','b']):
             'sales': monthlySales,
             'total': total
         }
-        print(saleReport)
 
         cursor.close()
         return render_template('staff_account_display.html', customerFlights=customerFlights, salesComp = salesComp, customers=customers, agents=agents, flights=flights, saleReport=saleReport, data=data, active_tab=active_tab)
@@ -936,6 +950,12 @@ def customerAccount(params = ['a','b']):
         cursor = conn.cursor()
         cursor.execute(query, value)
         data = cursor.fetchall()
+      
+        #get customer info
+        query = "SELECT * FROM customer WHERE email = %s"
+        cursor.execute(query, value[0])
+        custData = cursor.fetchone()
+
         cursor.close()
 
         monthly_sums = []
@@ -955,21 +975,6 @@ def customerAccount(params = ['a','b']):
             '12': "Dec"
         }
 
-        sumAssign = {
-            "01": 0,
-            "02": 1,
-            "03": 2,
-            "04": 3,
-            "05": 4,
-            "06": 5,
-            "07": 6,
-            "08": 7,
-            "09": 8,
-            "10": 9,
-            "11": 10,
-            "12": 11
-        }
-
         if(startDate != 'a'):
             start = int((str(startDate))[5:7])
             end = int((str(endDate))[5:7])
@@ -981,12 +986,17 @@ def customerAccount(params = ['a','b']):
                 sdate = int(str(pdate)[5:7]) - start
                 monthly_sums[sdate] += purchase['price']
         else:
-            monthly_sums = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-            months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sept","Oct","Nov","Dec"]
+            dStart = date.today()
+            end = int((str(dStart))[5:7])
+            start = end - 5
+            for i in range(start, end + 1):
+                months.append(monthDict[str(i)])
+                monthly_sums.append(0)
             for purchase in data:
                 pdate = purchase['purchase_date']
-                pdate = str(pdate)[5:7]
-                monthly_sums[sumAssign[pdate]] += purchase['price']
+                sdate = int(str(pdate)[5:7]) - start
+                if(sdate >= 0):
+                    monthly_sums[sdate] += purchase['price']
 
         total = 0
         for i in range(0, len(monthly_sums)):
@@ -1000,7 +1010,7 @@ def customerAccount(params = ['a','b']):
             'total': total
         }
 
-        return render_template('account_display.html', data=data)
+        return render_template('account_display.html', data=data, custData = custData)
     else:
         return redirect(url_for('login'))
 
@@ -1032,7 +1042,6 @@ def purchase(flightNum):
             '''
 
             values = (ticketID, airlineName, flightNum)
-            print(values)
             cursor.execute(query, values)
 
             query_cust= '''

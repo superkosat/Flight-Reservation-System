@@ -36,14 +36,13 @@
               <a class="list-group-item list-group-item-action" id="list-spending-list" data-bs-toggle="list" href="#list-flights" role="tab" aria-controls="list-flights"><i class="bi-airplane-fill" style="font-size: 1rem;"></i>  Flights</a>
               <a class="list-group-item list-group-item-action" id="list-agents-list" data-bs-toggle="list" href="#list-agents" role="tab" aria-controls="list-agents"><i class="bi-person-badge-fill" style="font-size: 1rem;"></i>  Agents</a>
               <a class="list-group-item list-group-item-action" id="list-settings-list" data-bs-toggle="list" href="#list-customers" role="tab" aria-controls="list-settings"><i class="bi-person-vcard-fill" style="font-size: 1rem;"></i>  Customers</a>
-              <a class="list-group-item list-group-item-action" id="list-settings-list" data-bs-toggle="list" href="#list-sales-report" role="tab" aria-controls="list-settings"><i class="bi-bar-chart-fill" style="font-size: 1rem;"></i>  Sales Report</a>
-              <a class="list-group-item list-group-item-action" id="list-settings-list" data-bs-toggle="list" href="#list-revenue-report" role="tab" aria-controls="list-settings"><i class="bi-pie-chart-fill" style="font-size: 1rem;"></i>  Revenue Report</a>
-              <a class="list-group-item list-group-item-action" id="list-settings-list" data-bs-toggle="list" href="#list-destinations" role="tab" aria-controls="list-settings"><i class="bi-pin-map-fill" style="font-size: 1rem;"></i>  Destinations</a> 
+              <a class="list-group-item list-group-item-action" id="list-sales-report-list" data-bs-toggle="list" href="#list-sales-report" role="tab" aria-controls="list-sales-report"><i class="bi-bar-chart-fill" style="font-size: 1rem;"></i>  Sales Report</a>
+              <a class="list-group-item list-group-item-action" id="list-settings-list" data-bs-toggle="list" href="#list-revenue-report" role="tab" aria-controls="list-settings"><i class="bi-pie-chart-fill" style="font-size: 1rem;"></i>  Revenue Report</a> 
           </div>
         </div>
         <div class="col-9">
           <div class="tab-content" id="nav-tabContent">
-            <div class="tab-pane fade show active" id="list-profile" role="tabpanel" aria-labelledby="list-profile-list">
+            <div class="tab-pane fade" id="list-profile" role="tabpanel" aria-labelledby="list-profile-list">
               <div class="container rounded">
                 {% if data %}
                     <h4>Airline Affiliation: {{ data.airline_name }}</h4>
@@ -240,15 +239,7 @@
                 </div>
   
               </div>
-              <!-- <div class="container">
-                <div class="input-group">
-                  <span class="input-group-text">Date Range</span>
-                  <input type="date" aria-label="First name" class="form-control">
-                  <input type="date" aria-label="Last name" class="form-control">
-                </div>
-              </div> -->
             </div>
-
 
 
             <div class="tab-pane fade" id="list-revenue-report" role="tabpanel" aria-labelledby="list-revenue-report-list">
@@ -278,7 +269,6 @@
               </div>
               {% endif %}
             </div>
-            <div class="tab-pane fade" id="list-destinations" role="tabpanel" aria-labelledby="list-destinations-list"></div>
           </div>
         </div>
       </div>  
