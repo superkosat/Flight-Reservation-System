@@ -940,16 +940,7 @@ def purchase(flightNum):
         data = cursor.fetchone()
         airlineName = data['airline_name']
 
-        if (session['user_type'] == 'booking_agent'):
-            query = "SELECT airline_name FROM booking_agent_work_for WHERE email = %s"
-            cursor.execute(query, session['username'])
-            airlines = cursor.fetchall()
-            print(data)
-            print(airlineName)
-            print(airlines)
-            if (airlineName not in airlines):
-                error_agent = 'Invalid agent credentials to purchase tickets for ' + airlineName
-                return render_template('search_display.html', error_agent=error_agent)
+        
 
         query = "SELECT MAX(ticket_id) FROM ticket"
         try:
