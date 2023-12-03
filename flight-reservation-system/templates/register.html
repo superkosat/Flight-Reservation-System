@@ -120,15 +120,6 @@
           <label for="inputPassword4" class="form-label">Password</label>
           <input name="password" type="password" class="form-control" id="inputPassword4" required>
         </div>
-        
-        <div class="col-md-4">
-          <label for="inputAirline" class="form-label">Airline Affiliation</label>
-          <select name="airline" id="inputAirline" class="form-select" required>
-              {% for airline in data %}
-              <option value="{{ airline.airline_name }}">{{ airline.airline_name }}</option>
-              {% endfor %}
-          </select>
-        </div>
 
         <div class="col-12">
           <div class="form-check">
