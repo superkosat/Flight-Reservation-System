@@ -97,12 +97,12 @@
                 <div class="container"> 
                     {% if session['user_type'] == 'booking_agent'%}
                     <!-- Button trigger modal -->
-                    <button type="button" class="btn btn-lg btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                    <button type="button" class="selectFlight btn btn-lg btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal{{flight.flight_num}}" >
                         Select Flight {{flight.flight_num}}
                     </button>
   
                     <!-- Modal -->
-                    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal fade" id="exampleModal{{flight.flight_num}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                         <div class="modal-dialog">
                             <div class="modal-content">
                                 <div class="modal-header">
@@ -113,7 +113,7 @@
                                     <form action="/purchase/{{flight.flight_num}}" method="POST">
                                         <div class="input-group m-2">
                                             <div class="input-group-prepend">
-                                            <div class="input-group-text">Customer Email:</div>
+                                            <div class="input-group-text">Customer Email {{flight.flight_num}}: </div>
                                             </div>
                                             <input name="customerEmail" type="email" class="form-control" id="custEmail">
                                         </div>
@@ -138,11 +138,11 @@
         </div>
     {% endfor %}
 
-
     {% if error %}
         <p class="text-danger">{{error}}</p>
     {% else %}
         <p class="text-muted">Search returned {{ data|length }} results</p>
     {% endif %}
 </div>
+
 {% endblock %}

@@ -606,9 +606,6 @@ def agentAccount(params = ['a','b']):
         cursor.execute(query, value)
         customerSales = cursor.fetchall()
 
-        #cSaleEmails = customerSales['email']
-        #cSaleSales = customerSales['tickets_purchased']
-
         emails = []
         sales = []
         for customer in customerSales:
@@ -637,9 +634,6 @@ def agentAccount(params = ['a','b']):
 
         cursor.execute(query, value)
         customerComms = cursor.fetchall()
-
-        #cCommsEmails = customerComms['email']
-        #cCommsComms = customerComms['past_year_commissions']
 
         emails = []
         comms = []
@@ -717,6 +711,80 @@ def staffAccount():
         cursor.execute(query, value)
         agents = cursor.fetchall()
 
+        #get direct sales
+        query='''
+        SELECT SUM(CASE WHEN p.purchase_date BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() THEN f.price ELSE 0 END) AS past_month_total,
+            SUM(CASE WHEN p.purchase_date BETWEEN CURDATE() - INTERVAL 365 DAY AND CURDATE() THEN f.price ELSE 0 END) AS past_year_total
+        FROM 
+            purchases AS p 
+        JOIN 
+            ticket AS t ON p.ticket_id = t.ticket_id
+        JOIN 
+            flight AS f ON t.flight_num = f.flight_num
+        WHERE 
+            p.booking_agent_id IS NULL
+        AND t.airline_name = %s
+        '''
+        cursor.execute(query, data['airline_name'])
+        direct = cursor.fetchall()
+
+        #get indirect sales
+        query='''
+        SELECT SUM(CASE WHEN p.purchase_date BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE() THEN f.price ELSE 0 END) AS past_month_total,
+            SUM(CASE WHEN p.purchase_date BETWEEN CURDATE() - INTERVAL 365 DAY AND CURDATE() THEN f.price ELSE 0 END) AS past_year_total
+        FROM 
+            purchases AS p 
+        JOIN 
+            ticket AS t ON p.ticket_id = t.ticket_id
+        JOIN 
+            flight AS f ON t.flight_num = f.flight_num
+        WHERE 
+            p.booking_agent_id IS NOT NULL
+        AND t.airline_name = %s
+        '''
+        cursor.execute(query, data['airline_name'])
+        indirect = cursor.fetchall()
+
+        mDirPer = 0
+        mIndPer = 0
+        if(direct[0]['past_month_total'] == None):
+            direct[0]['past_month_total'] = 0
+            mDirPer = 0
+            mIndPer = 100
+        elif(indirect[0]['past_month_total'] == None):
+            indirect[0]['past_month_total'] = 0
+            mDirPer = 100
+            mIndPer = 0
+        else:
+            mDirPer = int(100*((direct[0]['past_month_total']) / (direct[0]['past_month_total'] + indirect[0]['past_month_total'])))
+            mIndPer = 100 - mDirPer
+
+        yDirPer = 0
+        yIndPer = 0
+        if(direct[0]['past_year_total'] == None):
+            direct[0]['past_year_total'] = 0
+            yDirPer = 0
+            yIndPer = 100
+        elif(indirect[0]['past_year_total'] == None):
+            indirect[0]['past_year_total'] = 0
+            yDirPer = 100
+            yIndPer = 0
+        else:
+            yDirPer = int(100*((direct[0]['past_year_total']) / (direct[0]['past_year_total'] + indirect[0]['past_year_total'])))
+            yIndPer = 100 - yDirPer
+        
+        salesComp = {
+            'directMonthly': str(direct[0]['past_month_total']),
+            'directYearly': str(direct[0]['past_year_total']),
+            'indirectMonthly': str(indirect[0]['past_month_total']),
+            'indirectYearly': str(indirect[0]['past_year_total']),
+            'mDirPercent':str(mDirPer),
+            'mIndPercent':str(mIndPer),
+            'yDirPercent':str(yDirPer),
+            'yIndPercent':str(yIndPer)
+        }
+        print(salesComp)
+
         #get top customers
         query = '''
         SELECT c.*, COUNT(p.ticket_id) AS tickets_purchased
@@ -743,7 +811,7 @@ def staffAccount():
 
 
         cursor.close()
-        return render_template('staff_account_display.html', customerFlights=customerFlights, customers=customers, agents=agents, flights=flights, data=data, active_tab=active_tab)
+        return render_template('staff_account_display.html', customerFlights=customerFlights, salesComp = salesComp, customers=customers, agents=agents, flights=flights, data=data, active_tab=active_tab)
     else:
         return make_response(render_template('403.html'), 403)
     
@@ -893,6 +961,7 @@ def purchase(flightNum):
             '''
 
             values = (ticketID, airlineName, flightNum)
+            print(values)
             cursor.execute(query, values)
 
             query_cust= '''

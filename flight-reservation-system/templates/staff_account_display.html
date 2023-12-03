@@ -211,7 +211,33 @@
 
 
 
-            <div class="tab-pane fade" id="list-revenue-report" role="tabpanel" aria-labelledby="list-revenue-report-list"></div>
+            <div class="tab-pane fade" id="list-revenue-report" role="tabpanel" aria-labelledby="list-revenue-report-list">
+              {% if salesComp.directMontly == None and salesComp.indirectMonthly == None %}
+                <h4 class="text-muted">No sales in past month.</h4>
+              {% else %}
+              <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+              <div class="container d-flex justify-container-center">
+                  <div class="row">
+                      <div class="col-md-6">
+                          <div id="monthPiechart3d" style="width: 1000px; height: 100px;"></div>
+                      </div>
+                  </div>
+              </div>
+              {% endif %}
+              <p style="margin-bottom:3cm;"></p>
+              {% if salesComp.directYearly == None and salesComp.indirectYearly == None %}
+                <h4 class="text-muted">No sales in past year.</h4>
+              {% else %}
+              <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+              <div class="container d-flex justify-container-center">
+                  <div class="row">
+                      <div class="col-md-6">
+                          <div id="yearPiechart3d" style="width: 1000px; height: 100px;"></div>
+                      </div>
+                  </div>
+              </div>
+              {% endif %}
+            </div>
             <div class="tab-pane fade" id="list-destinations" role="tabpanel" aria-labelledby="list-destinations-list"></div>
           </div>
         </div>
@@ -241,7 +267,7 @@
         var matches = [];
 
         // Filter customerFlights based on the provided email
-        $.each({{ customerFlights | tojson | safe }}, function(index, item) {
+        $.each('{{ customerFlights | tojson | safe }}', function(index, item) {
             if (item.email === searchEmail) {
                 matches.push(item);
             }
@@ -258,7 +284,96 @@
         });
         $('#searchResults').html(resultsHtml);
     });
-});
+  });
+  </script>
+
+
+  <script>
+    src = "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"
+    src = "https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-alpha1/dist/js/bootstrap.bundle.min.js"
+    src = "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"
+  </script>
+
+  <script>
+    var salesComp = JSON.parse('{{salesComp | tojson | safe}}');
+    var directMonthly = salesComp.directMonthly
+    var indirectMonthly = salesComp.indirectMonthly
+    var mDirPercent = parseInt(salesComp.mDirPercent)
+    var mIndPercent = parseInt(salesComp.mIndPercent)
+    console.log(salesComp)
+
+    $(document).ready(function(){
+
+    google.charts.load('current', {'packages':['corechart']});
+    google.charts.setOnLoadCallback(drawChart);
+
+    function drawChart() { 
+
+    var data = google.visualization.arrayToDataTable([
+    ['Source', 'Percentage'],
+    ['Direct Sales: ' + directMonthly, mDirPercent],
+    ['Indirect Sales: ' + indirectMonthly, mIndPercent],
+
+    ]);
+
+    var options = {
+    title: 'Sales Comparison Monthly: ',
+    pieSliceText: 'value',
+    is3D:true
+    };
+
+
+    var chart = new google.visualization.PieChart(document.getElementById('monthPiechart3d'));
+
+    chart.draw(data, options);
+    }
+
+
+    });
+  </script>
+
+  <script>
+    src = "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"
+    src = "https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-alpha1/dist/js/bootstrap.bundle.min.js"
+    src = "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"
+  </script>
+
+  <script>
+    var salesComp = JSON.parse('{{salesComp | tojson | safe}}');
+    var directYearly = salesComp.directYearly
+    var indirectYearly = salesComp.indirectYearly
+    var yDirPercent = parseInt(salesComp.yDirPercent)
+    var yIndPercent = parseInt(salesComp.yIndPercent)
+    console.log(salesComp)
+
+    $(document).ready(function(){
+
+    google.charts.load('current', {'packages':['corechart']});
+    google.charts.setOnLoadCallback(drawChart);
+
+    function drawChart() { 
+
+    var data = google.visualization.arrayToDataTable([
+    ['Source', 'Percentage'],
+    ['Direct Sales: ' + directYearly, yDirPercent],
+    ['Indirect Sales: ' + indirectYearly, yIndPercent],
+
+    ]);
+
+    var options = {
+    title: 'Sales Comparison Yearly: ',
+    pieSliceText: 'value',
+    is3D:true
+    };
+
+
+    var chart = new google.visualization.PieChart(document.getElementById('yearPiechart3d'));
+
+    chart.draw(data, options);
+    }
+
+
+    });
   </script>
   
 
