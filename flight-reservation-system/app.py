@@ -564,20 +564,6 @@ def agentAccount(params = ['a','b']):
         WHERE 
             ba.email = %s
         '''
-        """ query2 = '''
-        SELECT SUM(CASE WHEN p.purchase_date BETWEEN %s AND %s THEN f.price * 0.1 ELSE 0 END) AS commissions,
-        COUNT(CASE WHEN p.purchase_date BETWEEN %s AND %s  THEN 1 ELSE 0 END) AS total_sales
-        FROM 
-            booking_agent AS ba
-        JOIN 
-            purchases AS p ON ba.booking_agent_id = p.booking_agent_id
-        JOIN 
-            ticket AS t ON p.ticket_id = t.ticket_id
-        JOIN 
-            flight AS f ON t.flight_num = f.flight_num
-        WHERE 
-            ba.email = %s
-        ''' """
         
         if(startDate != 'a'):
             start = startDate
@@ -588,11 +574,11 @@ def agentAccount(params = ['a','b']):
         else:
             cursor.execute(query2, values)
         commissions = cursor.fetchall()
-        print(commissions)
         if(commissions[0]['commissions'] != None):
             commissions[0]['commissions'] = int(commissions[0]['commissions'])
         elif(commissions[0]['commissions'] == None and params[0] != 'a'):
             commissions[0]['commissions'] = 0
+        #total_sales unnecessary here I think
 
         #get top 5 customers by number sales last 6 months: need to make it just 5
         query = '''
@@ -651,10 +637,21 @@ def agentAccount(params = ['a','b']):
         return render_template('agent_account_display.html', saleData=saleData, commsData = commsData, commissions = commissions, flights=flights, data=data, active_tab=active_tab)
     else:
         return make_response(render_template('403.html'), 403)
-    
+
+@app.route('/filterSales',  methods=['GET', 'POST'])
+def filterSales():
+    startDate = request.form['startDate']
+    endDate = request.form['endDate']
+    params = [startDate, endDate]
+    return staffAccount(params)
+
 @app.route('/staff/account')
-def staffAccount():
+def staffAccount(params = ['a','b']):
     if (is_logged_in() and session['user_type'] == 'airline_staff'):
+        startDate = params[0]
+        endDate = params[1]
+        start = ""
+        end = ""
         active_tab = 'list-profile'
         value = session['username']
         cursor = conn.cursor()
@@ -783,7 +780,6 @@ def staffAccount():
             'yDirPercent':str(yDirPer),
             'yIndPercent':str(yIndPer)
         }
-        print(salesComp)
 
         #get top customers
         query = '''
@@ -809,9 +805,91 @@ def staffAccount():
         cursor.execute(query, value)
         customerFlights = cursor.fetchall()
 
+        #get sales report data
+        
+        conditions = ["ticket.airline_name = %s"]
+
+        values = [data['airline_name']]
+
+        if(startDate != 'a'):
+            conditions.append(" purchases.purchase_date BETWEEN %s and %s")
+            values.append(startDate)
+            values.append(endDate)
+        query = '''
+        SELECT purchase_date FROM flight
+        NATURAL JOIN purchases
+        NATURAL JOIN ticket
+        WHERE {}
+        '''.format(" AND ".join(conditions))
+    
+        cursor = conn.cursor()
+        cursor.execute(query, values)
+        totalSales = cursor.fetchall()
+        #print(totalSales)
+        monthlySales = []
+        months = []
+        monthDict = {
+            '1': "Jan",
+            '2': "Feb",
+            '3': "Mar",
+            '4': "Apr",
+            '5': "May",
+            '6': "Jun",
+            '7': "Jul",
+            '8': "Aug",
+            '9': "Sept",
+            '10': "Oct",
+            '11': "Nov",
+            '12': "Dec"
+        }
+
+        sumAssign = {
+            "01": 0,
+            "02": 1,
+            "03": 2,
+            "04": 3,
+            "05": 4,
+            "06": 5,
+            "07": 6,
+            "08": 7,
+            "09": 8,
+            "10": 9,
+            "11": 10,
+            "12": 11
+        }
+
+        if(startDate != 'a'):
+            start = int((str(startDate))[5:7])
+            end = int((str(endDate))[5:7])
+            for i in range(start, end + 1):
+                months.append(monthDict[str(i)])
+                monthlySales.append(0)
+            for purchase in totalSales:
+                pdate = purchase['purchase_date']
+                sdate = int(str(pdate)[5:7]) - start
+                monthlySales[sdate] += 1
+        else:
+            monthlySales = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+            months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sept","Oct","Nov","Dec"]
+            for purchase in totalSales:
+                pdate = purchase['purchase_date']
+                pdate = str(pdate)[5:7]
+                monthlySales[sumAssign[pdate]] += 1
+        total = 0
+        for i in range(0, len(monthlySales)):
+            total += monthlySales[i]
+            monthlySales[i] = str(monthlySales[i])
+        total = str(total)
+
+        saleReport = {
+            'months': months,
+            'sales': monthlySales,
+            'total': total
+        }
+        print(saleReport)
 
         cursor.close()
-        return render_template('staff_account_display.html', customerFlights=customerFlights, salesComp = salesComp, customers=customers, agents=agents, flights=flights, data=data, active_tab=active_tab)
+        return render_template('staff_account_display.html', customerFlights=customerFlights, salesComp = salesComp, customers=customers, agents=agents, flights=flights, saleReport=saleReport, data=data, active_tab=active_tab)
     else:
         return make_response(render_template('403.html'), 403)
     

@@ -200,13 +200,53 @@
 
 
             <div class="tab-pane fade" id="list-sales-report" role="tabpanel" aria-labelledby="list-sales-report-list">
-              <div class="container">
+              <div class="card chart-container">
+                <canvas id="chart"></canvas>
+                
+                <!-- Button trigger modal -->
+                <button type="button" class="btn btn-lg btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                  Filter Dates
+                </button>
+  
+                <!-- Modal -->
+                <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                  <div class="modal-dialog">
+                      <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">Filter Dates:</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <div class="modal-body">
+                            <form action="/filterSales" method="POST">
+                                <div class="input-group m-2">
+                                    <div class="input-group-prepend">
+                                    <div class="input-group-text">Start Date:</div>
+                                    </div>
+                                    <input name="startDate" type="date" class="form-control" id="sDate" required>
+                                </div>
+                                <div class="input-group m-2">
+                                  <div class="input-group-prepend">
+                                  <div class="input-group-text">End Date:</div>
+                                  </div>
+                                  <input name="endDate" type="date" class="form-control" id="eDate" required>
+                              </div>
+                                <div>
+                                    <button type="submit" class="btn btn-primary">Filter</button>
+                                </div>
+                            </form> 
+                          </div>
+                      </div>
+                  </div>
+                </div>
+  
+              </div>
+              <!-- <div class="container">
                 <div class="input-group">
                   <span class="input-group-text">Date Range</span>
                   <input type="date" aria-label="First name" class="form-control">
                   <input type="date" aria-label="Last name" class="form-control">
                 </div>
-              </div>
+              </div> -->
             </div>
 
 
@@ -300,7 +340,6 @@
     var indirectMonthly = salesComp.indirectMonthly
     var mDirPercent = parseInt(salesComp.mDirPercent)
     var mIndPercent = parseInt(salesComp.mIndPercent)
-    console.log(salesComp)
 
     $(document).ready(function(){
 
@@ -344,7 +383,6 @@
     var indirectYearly = salesComp.indirectYearly
     var yDirPercent = parseInt(salesComp.yDirPercent)
     var yIndPercent = parseInt(salesComp.yIndPercent)
-    console.log(salesComp)
 
     $(document).ready(function(){
 
@@ -375,6 +413,46 @@
 
     });
   </script>
+
+<script
+src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.js">
+</script>
+
+<script>
+
+  var saleReport = JSON.parse('{{saleReport | tojson | safe}}');
+  var months = saleReport.months
+  var sales = saleReport.sales
+  var total = saleReport.total
+  length = sales.length;
+  var salesArray = [];
+
+  for (var i = 0; i < length; i++) 
+    salesArray.push(parseInt(sales[i])); 
+
+  const ctx = document.getElementById("chart").getContext('2d');
+  const myChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: months,
+      datasets: [{
+        label: 'Total Sales: ' + total,
+        backgroundColor: 'rgba(161, 198, 247, 1)',
+        borderColor: 'rgb(47, 128, 237)',
+        data: salesArray,
+      }]
+    },
+    options: {
+      scales: {
+        yAxes: [{
+          ticks: {
+            beginAtZero: true,
+          }
+        }]
+      }
+    },
+  });
+</script>
   
 
 
