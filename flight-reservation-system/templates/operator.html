@@ -2,4 +2,40 @@
 
 {% block content %}
 
+
+
+<div class="container" style="margin-top: 2%;">
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                {% if message == "error-invalid-info" %}
+                    <div class="alert alert-danger" role="alert">
+                        Error changing status
+                    </div>
+                {% elif message == "error-invalid-flight" %}
+                    <div class="alert alert-danger" role="alert">
+                        Error changing status: Invalid flight number
+                    </div>
+                {% elif message == "success" %}
+                    <div class="alert alert-success" role="alert">
+                        Status changed successfully
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    <h3>Operator Dashboard</h3>
+    <form action="/operator/changeFlightStatus" method="POST">
+        <div class="input-group flex-nowrap">
+            <span class="input-group-text" id="addon-wrapping">Flight Number and Status</span>
+            <input name="flightNum" type="number" class="form-control" placeholder="Flight Number" aria-label="Flight #" aria-describedby="addon-wrapping">
+            <select name="flightStatus" class="form-select" aria-label="Default select example">
+                <option value="On time" selected>On time</option>
+                <option value="Delayed">Delayed</option>
+                <option value="In flight">In flight</option>
+            </select>
+            <button class="btn btn-primary" type="submit">Change Status</button>
+        </div>
+    </form>
+</div>
 {% endblock %}

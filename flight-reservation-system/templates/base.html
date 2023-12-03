@@ -30,6 +30,7 @@
               <li class="nav-item">
                 <a class="nav-link" href="/displayDestinations">Destinations</a>
               </li>
+              {% if session['user_type'] == 'customer' %}
               <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                   Flights
@@ -39,6 +40,11 @@
                   <li><a class="dropdown-item" href="/displayUpcoming">Upcoming</a></li>
                 </ul>
               </li>
+              {% else %}
+              <li class="nav-item">
+                <a class="nav-link" href="/displayUpcoming">Flights</a>
+              </li>
+              {% endif %}
             </ul>
             <ul class="navbar-nav ms-auto">
                 {% if session['permission'] == 'admin' %}
@@ -47,7 +53,7 @@
                   </a>
                 {% elif session['permission'] == 'operator' %}
                   <a class="btn btn-outline-dark" href="/operator/dashboard" role="button" style="margin-right: 10px">
-                      <i class="bi-shield-plus"></i> Operator Dashboard
+                      <i class="bi-headset"></i> Operator Dashboard
                   </a>
                 {% endif %}
                 {% if session['username'] %}

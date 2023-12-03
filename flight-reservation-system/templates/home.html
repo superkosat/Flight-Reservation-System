@@ -23,6 +23,10 @@
                 <div class="alert alert-success" role="alert">
                   Purchase successful!
                 </div>
+              {% elif message == "agent-error" %}
+                <div class="alert alert-warning" role="alert">
+                  Error Purchasing Flight: Invalid agent credentials for this airline
+                </div>
               {% endif %}
             {% endfor %}
           {% endif %}
