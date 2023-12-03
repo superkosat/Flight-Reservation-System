@@ -258,7 +258,6 @@ def registerCustomer():
 def registerBookingAgent():
     email = request.form['email']
     password = request.form['password']
-    airline = request.form['airline']
 
     cursor = conn.cursor()
     query = "SELECT MAX(booking_agent_id) FROM booking_agent"
@@ -274,14 +273,6 @@ def registerBookingAgent():
         '''
 
         values = (email, password, agentID)
-        cursor.execute(query, values)
-
-        query= '''
-        INSERT INTO booking_agent_work_for(`email`, `airline_name`)
-        VALUES(%s, %s)
-        '''
-
-        values = (email, airline)
         cursor.execute(query, values)
 
         conn.commit()
@@ -1027,6 +1018,8 @@ def purchase(flightNum):
         data = cursor.fetchone()
         airlineName = data['airline_name']
 
+        
+
         query = "SELECT MAX(ticket_id) FROM ticket"
         try:
             cursor.execute(query)
@@ -1115,6 +1108,68 @@ def adminDashboard():
         else:
             error = 'No airplanes found'
             return render_template('admin.html', error=error) 
+    else:
+        return make_response(render_template('403.html'), 403)
+    
+@app.route('/admin/modifyPermission', methods = ['POST'])
+def modifyPermission():
+    if (is_logged_in() and session['permission'] == 'admin'):
+        username = request.form['username']
+        permission = request.form['permission']
+
+        cursor = conn.cursor()
+        try:
+            cursor.execute("SELECT * FROM permission WHERE username = %s", (username))
+            existing_record = cursor.fetchone()
+
+            if existing_record:
+                # If the record exists, update the permission_type
+                cursor.execute("UPDATE permission SET permission_type = %s WHERE username = %s", (permission, username))
+                conn.commit()
+            else:
+                # If the record doesn't exist, create a new entry
+                cursor.execute("INSERT INTO permission (`username`, `permission_type`) VALUES (%s, %s)", (username, permission))
+                conn.commit()
+
+            cursor.close()
+            message = "success"
+            flash(message)
+            return redirect(url_for('adminDashboard'))
+        except Exception as e:
+            conn.rollback()
+            # for debugging - error = f"Error: {e}"
+            message = "error-invalid-info"
+            flash(message)
+            return redirect(url_for('adminDashboard'))
+    else:
+        return make_response(render_template('403.html'), 403)
+    
+@app.route('/admin/addBookingAgent', methods=['POST'])
+def addBookingAgent():
+    if (is_logged_in() and session['permission'] == 'admin'):
+        bookingAgentEmail = request.form['email']
+        
+        cursor = conn.cursor()
+        query = '''
+            INSERT INTO booking_agent_work_for(`email`, `airline_name`)
+            VALUES (%s, %s);
+        '''
+
+        try:
+            cursor.execute("SELECT airline_name FROM airline_staff WHERE username = %s", (session['username']))
+            bookingAgentAirline = cursor.fetchone()['airline_name']
+            values = (bookingAgentEmail, bookingAgentAirline)
+            cursor.execute(query, values)
+            conn.commit()
+            message = "success"
+            flash(message)
+            return redirect(url_for('adminDashboard'))
+        except Exception as e:
+            conn.rollback()
+            #for debugging - error = f"Error: {e}"
+            message = "error-invalid-info"
+            flash(message)
+            return redirect(url_for('adminDashboard'))
     else:
         return make_response(render_template('403.html'), 403)
 

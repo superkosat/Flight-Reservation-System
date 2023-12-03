@@ -31,6 +31,12 @@
     <li class="nav-item" role="presentation">
       <button class="nav-link" id="pills-contact-tab" data-bs-toggle="pill" data-bs-target="#pills-contact" type="button" role="tab" aria-controls="pills-contact" aria-selected="false">Add Airport</button>
     </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="pills-permissions-tab" data-bs-toggle="pill" data-bs-target="#pills-permissions" type="button" role="tab" aria-controls="pills-permissions" aria-selected="false">Modify Permissions</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="pills-agents-tab" data-bs-toggle="pill" data-bs-target="#pills-agents" type="button" role="tab" aria-controls="pills-agents" aria-selected="false">Add Booking Agent</button>
+    </li>
   </ul>
   <hr>
   <div class="tab-content" id="pills-tabContent">
@@ -138,6 +144,34 @@
         </div>
       </form>
     </div>
+    <!-- Modify Permissions -->
+    <div class="tab-pane fade" id="pills-permissions" role="tabpanel" aria-labelledby="pills-home-tab">
+      <form action="/admin/modifyPermission" method="POST">
+        <div class="input-group">
+          <span class="input-group-text">Username and Permission Type</span>
+          <input name="username" type="text" aria-label="Username" class="form-control">
+          <select name="permission" class="form-select" aria-label="Default select example">
+            <option value="staff" selected>Staff</option>
+            <option value="operator">Operator</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+        <div style="margin-top: 2%;">
+          <button type="submit" class="btn btn-large btn-primary">Submit</button>
+        </div>
+      </form>
+    </div>
+    <!-- Add Booking Agent -->
+    <div class="tab-pane fade" id="pills-agents" role="tabpanel" aria-labelledby="pills-home-tab">
+      <form action="/admin/addBookingAgent" method="POST">
+        <div class="input-group">
+          <span class="input-group-text">Booking agent email</span>
+          <input name="email" type="email" aria-label="Email" class="form-control">
+          <button type="submit" class="btn btn-large btn-primary">Submit</button>
+        </div>
+      </form>
+    </div>
+
   </div>
 </div>
 {% endblock %}
