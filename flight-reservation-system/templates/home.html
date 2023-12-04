@@ -27,6 +27,10 @@
                 <div class="alert alert-warning" role="alert">
                   Error Purchasing Flight: Invalid agent credentials for this airline
                 </div>
+              {% elif message == "error-no-seats" %}
+                <div class="alert alert-danger" role="alert">
+                  Error Purchasing Flight: No tickets left on this flight
+                </div>
               {% endif %}
             {% endfor %}
           {% endif %}

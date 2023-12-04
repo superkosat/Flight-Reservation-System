@@ -1089,7 +1089,26 @@ def customerAccount(params = ['a','b']):
 @app.route('/purchase/<int:flightNum>', methods=['GET', 'POST'])
 def purchase(flightNum):
     if (is_logged_in()):
+
         cursor = conn.cursor()
+
+        queryFlightRemainingSeats = '''
+            SELECT (
+                (SELECT seats FROM flight INNER JOIN airplane ON flight.airplane_id = airplane.airplane_id WHERE flight.flight_num = %s) 
+                    - 
+                (SELECT COUNT(ticket_id) FROM ticket WHERE flight_num = %s)
+            ) AS remaining_seats
+        '''
+
+        cursor.execute(queryFlightRemainingSeats, (flightNum, flightNum))
+        remainingSeats = cursor.fetchone()['remaining_seats']
+
+        if (remainingSeats <= 0):
+            message = "error-no-seats"
+            flash(message)
+            return redirect(url_for('home'))
+
+
         query = '''
         SELECT airline_name
         FROM flight  
