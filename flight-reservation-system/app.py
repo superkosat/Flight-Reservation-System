@@ -138,7 +138,10 @@ def loginAuth():
                 query = "SELECT permission_type FROM permission NATURAL JOIN airline_staff WHERE username = %s"
                 cursor.execute(query, (username))
                 data = cursor.fetchone()
-                session['permission'] = data['permission_type']
+                if data==None:
+                    session['permission'] = None
+                else:
+                    session['permission'] = data['permission_type']
 
             # Add additional data to the session if needed
 

@@ -28,17 +28,24 @@
     </div>
 </div>
 
+{% if session['permission'] == None %}
+      <div class="container rounded">
+          <h3>Please contact an administrator to obtain staff permissions</h3>
+      </div>
+{% endif %}
 
 <div class="container" style="margin-top: 20px;">
     <div class="row">
         <div class="col-3">
           <div class="list-group" id="list-tab" role="tablist">
+              {% if session['permission'] == 'staff' or session['permission'] == 'admin' or session['permission'] == 'operator' %}
               <a class="list-group-item list-group-item-action active" id="list-profile-list" data-bs-toggle="list" href="#list-profile" role="tab" aria-controls="list-profile"><i class="bi-person-fill" style="font-size: 1.1rem;"></i>  Profile</a>
               <a class="list-group-item list-group-item-action" id="list-spending-list" data-bs-toggle="list" href="#list-flights" role="tab" aria-controls="list-flights"><i class="bi-airplane-fill" style="font-size: 1rem;"></i>  Flights</a>
               <a class="list-group-item list-group-item-action" id="list-agents-list" data-bs-toggle="list" href="#list-agents" role="tab" aria-controls="list-agents"><i class="bi-person-badge-fill" style="font-size: 1rem;"></i>  Agents</a>
               <a class="list-group-item list-group-item-action" id="list-settings-list" data-bs-toggle="list" href="#list-customers" role="tab" aria-controls="list-settings"><i class="bi-person-vcard-fill" style="font-size: 1rem;"></i>  Customers</a>
               <a class="list-group-item list-group-item-action" id="list-sales-report-list" data-bs-toggle="list" href="#list-sales-report" role="tab" aria-controls="list-sales-report"><i class="bi-bar-chart-fill" style="font-size: 1rem;"></i>  Sales Report</a>
               <a class="list-group-item list-group-item-action" id="list-settings-list" data-bs-toggle="list" href="#list-revenue-report" role="tab" aria-controls="list-settings"><i class="bi-pie-chart-fill" style="font-size: 1rem;"></i>  Revenue Report</a> 
+              {% endif %}
           </div>
         </div>
         <div class="col-9">
