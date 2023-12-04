@@ -1,4 +1,5 @@
 from flask import Flask, render_template, session, request, url_for, redirect, flash, abort, make_response
+from werkzeug.security import generate_password_hash, check_password_hash
 import pymysql.cursors
 from datetime import date
 
@@ -116,32 +117,61 @@ def loginAuth():
     #SELECT * FROM customer WHERE email = %s AND password = %s
     cursor = conn.cursor()
     query = '''
-        SELECT 'customer' AS user_type, email, password, name FROM customer WHERE email = %s AND password = %s
+        SELECT 'customer' AS user_type, email, password, name FROM customer WHERE email = %s
         UNION
-        SELECT 'airline_staff' AS user_type, username AS email, password, first_name FROM airline_staff WHERE username = %s AND password = %s
+        SELECT 'airline_staff' AS user_type, username AS email, password, first_name FROM airline_staff WHERE username = %s
         UNION
-        SELECT 'booking_agent' AS user_type, email, password, booking_agent_id FROM booking_agent WHERE email = %s AND password = %s
+        SELECT 'booking_agent' AS user_type, email, password, booking_agent_id FROM booking_agent WHERE email = %s
     '''
-    cursor.execute(query, (username, password, username, password, username, password))
+    cursor.execute(query, (username, username, username))
 
     data = cursor.fetchone()
-
+    print(data)
     error = None
-    if (data):
-        session['username'] = username
-        session['user_type'] = data['user_type']
-        session['name'] = data['name']
-        if session['user_type'] == 'airline_staff':
-            query = "SELECT permission_type FROM permission NATURAL JOIN airline_staff WHERE username = %s"
-            cursor.execute(query, (username))
-            data = cursor.fetchone()
-            session['permission'] = data['permission_type']
-        cursor.close()
-        return redirect(url_for('home'))
+    if data:
+        stored_password = data['password']
+        if check_password_hash(stored_password, password):
+            session['username'] = username
+            session['user_type'] = data['user_type']
+            session['name'] = data['name']
+            if session['user_type'] == 'airline_staff':
+                query = "SELECT permission_type FROM permission NATURAL JOIN airline_staff WHERE username = %s"
+                cursor.execute(query, (username))
+                data = cursor.fetchone()
+                session['permission'] = data['permission_type']
+
+            # Add additional data to the session if needed
+
+            cursor.close()
+            return redirect(url_for('home'))
+        else:
+            error = 'Invalid password'
+            print(stored_password)
+            print(password)
+            print(check_password_hash(generate_password_hash(password, method='pbkdf2:sha256', salt_length=8), password))
     else:
-        cursor.close()
         error = 'Invalid username or password'
-        return render_template('login.html', error=error)
+
+    cursor.close()
+    return render_template('login.html', error=error)
+
+
+    #error = None
+    #if (data):
+    #    session['username'] = username
+    #    session['user_type'] = data['user_type']
+    #    session['name'] = data['name']
+    #    if session['user_type'] == 'airline_staff':
+    #        query = "SELECT permission_type FROM permission NATURAL JOIN airline_staff WHERE username = %s"
+    #        cursor.execute(query, (username))
+    #        data = cursor.fetchone()
+    #        session['permission'] = data['permission_type']
+    #    cursor.close()
+    #    return redirect(url_for('home'))
+    #else:
+    #    cursor.close()
+    #    error = 'Invalid username or password'
+    #    return render_template('login.html', error=error)
 
 #route to render the new user registration template
 @app.route('/register')
@@ -215,7 +245,7 @@ def register():
 @app.route('/registerCustomer', methods=['GET', 'POST'])
 def registerCustomer():
     email = request.form['email']
-    password = request.form['password']
+    password = generate_password_hash(request.form['password'], method='pbkdf2:sha256', salt_length=8)
     name = request.form['name']
     buildingNumber = request.form['buildingNumber']
     streetName = request.form['streetName']
@@ -257,7 +287,7 @@ def registerCustomer():
 @app.route('/registerBookingAgent', methods=['GET', 'POST'])
 def registerBookingAgent():
     email = request.form['email']
-    password = request.form['password']
+    password = generate_password_hash(request.form['password'], method='pbkdf2:sha256', salt_length=8)
 
     cursor = conn.cursor()
     query = "SELECT MAX(booking_agent_id) FROM booking_agent"
@@ -292,7 +322,7 @@ def registerBookingAgent():
 @app.route('/registerAirlineStaff', methods=['GET', 'POST'])
 def registerAirlineStaff():
     username = request.form['username']
-    password = request.form['password']
+    password = generate_password_hash(request.form['password'], method='pbkdf2:sha256', salt_length=8)
     firstName = request.form['firstName']
     lastName = request.form['lastName']
     dateOfBirth = request.form['dateOfBirth']
