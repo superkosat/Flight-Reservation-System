@@ -593,12 +593,13 @@ def agentAccount(params = ['a','b']):
         emailsLimit = []
         salesLimit = []
         i = 0
-        while(len(emailsLimit) < 5):
-            emailsLimit.append(emails[i])
-            salesLimit.append(sales[i])
-            i += 1
-            if(len(emailsLimit) == len(emails)):
-                break
+        if(len(emails) != 0):
+            while(len(emailsLimit) < 5):
+                emailsLimit.append(emails[i])
+                salesLimit.append(sales[i])
+                i += 1
+                if(len(emailsLimit) == len(emails)):
+                    break
         emails = emailsLimit
         sales = salesLimit
 
@@ -633,12 +634,13 @@ def agentAccount(params = ['a','b']):
         emailsLimit = []
         commsLimit = []
         i = 0
-        while(len(emailsLimit) < 5):
-            emailsLimit.append(emails[i])
-            commsLimit.append(comms[i])
-            i += 1
-            if(len(emailsLimit) == len(emails)):
-                break
+        if(len(emails) != 0):
+            while(len(emailsLimit) < 5):
+                emailsLimit.append(emails[i])
+                commsLimit.append(comms[i])
+                i += 1
+                if(len(emailsLimit) == len(emails)):
+                    break
         emails = emailsLimit
         comms = commsLimit
         
