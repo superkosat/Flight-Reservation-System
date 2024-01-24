@@ -927,7 +927,6 @@ def staffAccount(params = ['a','b']):
             'sales': monthlySales,
             'total': total
         }
-
         cursor.close()
         return render_template('staff_account_display.html', customerFlights=customerFlights, salesComp = salesComp, customers=customers, agents=agents, flights=flights, saleReport=saleReport, data=data, active_tab=active_tab)
     else:
@@ -1201,7 +1200,7 @@ def purchase(flightNum):
         flash(message)
         return redirect(url_for('register'))
     
-#TODO route to render admin dashboard for authenticated staff with admin permissions
+#route to render admin dashboard for authenticated staff with admin permissions
 @app.route('/admin/dashboard')
 def adminDashboard():
     if (is_logged_in() and session['permission'] == 'admin'):
