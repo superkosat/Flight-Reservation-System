@@ -1,6 +1,6 @@
 # Flight Reservation System
 
-![Home Page](/flight-reservation-system/static/homepage.png)
+![Home Page](../flight-reservation-system/static/homepage.png)
 
 ## Overview ##
 Flight reservation system full stack web application built with flask and mysql. Front end bult with bootstrap, jquery for sorting and displaying data according to user-specified parameters and handle asynchronous requests.
