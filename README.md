@@ -1,6 +1,6 @@
 # Flight Reservation System
 
-![Home Page](homepage.png)
+![homepage](https://github.com/superkosat/Flight-Reservation-System/assets/36095695/00a564ba-34f7-4af1-871a-c31842c9a4b1)
 
 ## Overview ##
 Flight reservation system full stack web application built with flask and mysql. Front end bult with bootstrap, jquery for sorting and displaying data according to user-specified parameters and handle asynchronous requests.
